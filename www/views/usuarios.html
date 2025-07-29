@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios - Patitas Felices</title>
+    <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <img src="../img/logo.png" alt="Patitas Felices">
+            </div>
+            <nav class="nav">
+                <button onclick="navigateTo('dashboard.html')" class="btn-secondary">Volver al Dashboard</button>
+                <button id="logoutBtn" class="btn-secondary">Cerrar Sesión</button>
+            </nav>
+        </header>
+
+        <main class="main-content">
+            <div class="users-container">
+                <div class="page-header">
+                    <h1>Gestión de Usuarios</h1>
+                    <button id="addUserBtn" class="btn-primary">+ Nuevo Usuario</button>
+                </div>
+
+                <div id="usersList" class="users-list">
+                    <!-- Los usuarios se cargarán dinámicamente aquí -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para agregar/editar usuario -->
+    <div id="userModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="userModalTitle">Nuevo Usuario</h2>
+                <span class="close" id="closeUserModal">&times;</span>
+            </div>
+            <form id="userForm">
+                <div class="form-group">
+                    <label for="userName">Nombre Completo</label>
+                    <input type="text" id="userName" name="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="userEmail">Email</label>
+                    <input type="email" id="userEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="userPassword">Contraseña</label>
+                    <input type="password" id="userPassword" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="userPhone">Teléfono</label>
+                    <input type="tel" id="userPhone" name="telefono" required>
+                </div>
+                <div class="form-group">
+                    <label for="userAddress">Dirección</label>
+                    <textarea id="userAddress" name="direccion" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="userRole">Rol</label>
+                    <select id="userRole" name="rol" required>
+                        <option value="cliente">Cliente</option>
+                        <option value="veterinario">Veterinario</option>
+                        <option value="recepcionista">Recepcionista</option>
+                        <option value="admin">Administrador</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Guardar</button>
+                    <button type="button" id="cancelUserBtn" class="btn-secondary">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/router.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/usuarios.js"></script>
+</body>
+</html> 

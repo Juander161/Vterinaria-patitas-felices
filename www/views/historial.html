@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial Médico - Patitas Felices</title>
+    <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <img src="../img/logo.png" alt="Patitas Felices">
+            </div>
+            <nav class="nav">
+                <button onclick="navigateTo('dashboard.html')" class="btn-secondary">Volver al Dashboard</button>
+                <button id="logoutBtn" class="btn-secondary">Cerrar Sesión</button>
+            </nav>
+        </header>
+
+        <main class="main-content">
+            <div class="history-container">
+                <div class="page-header">
+                    <h1>Historial Médico</h1>
+                    <button id="addHistoryBtn" class="btn-primary" style="display: none;">+ Nuevo Historial</button>
+                </div>
+
+                <div id="historyList" class="history-list">
+                    <!-- Los historiales se cargarán dinámicamente aquí -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para agregar/editar historial -->
+    <div id="historyModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="historyModalTitle">Nuevo Historial</h2>
+                <span class="close" id="closeHistoryModal">&times;</span>
+            </div>
+            <form id="historyForm">
+                <div class="form-group">
+                    <label for="historyPet">Mascota</label>
+                    <select id="historyPet" name="mascotaId" required>
+                        <option value="">Seleccionar mascota</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="historyDate">Fecha</label>
+                    <input type="date" id="historyDate" name="fecha" required>
+                </div>
+                <div class="form-group">
+                    <label for="historySymptoms">Síntomas</label>
+                    <textarea id="historySymptoms" name="sintomas" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="historyDiagnosis">Diagnóstico</label>
+                    <textarea id="historyDiagnosis" name="diagnostico" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="historyTreatment">Tratamiento</label>
+                    <textarea id="historyTreatment" name="tratamiento" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="historyObservations">Observaciones</label>
+                    <textarea id="historyObservations" name="observaciones"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Guardar</button>
+                    <button type="button" id="cancelHistoryBtn" class="btn-secondary">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/router.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/historial.js"></script>
+</body>
+</html> 

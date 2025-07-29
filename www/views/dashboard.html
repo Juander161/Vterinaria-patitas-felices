@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Patitas Felices</title>
+    <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <img src="../img/logo.png" alt="Patitas Felices">
+            </div>
+            <nav class="nav">
+                <div class="user-info">
+                    <span id="userName"></span>
+                    <span id="userRole"></span>
+                </div>
+                <button id="logoutBtn" class="btn-secondary">Cerrar Sesión</button>
+            </nav>
+        </header>
+
+        <main class="main-content">
+            <div class="dashboard-container">
+                <h1>Bienvenido a Patitas Felices</h1>
+                
+                <!-- Dashboard para Cliente -->
+                <div id="clienteDashboard" class="role-dashboard" style="display: none;">
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card" onclick="navigateTo('mascotas.html')">
+                            <h3>Mis Mascotas</h3>
+                            <p>Gestiona tus mascotas</p>
+                        </div>
+                        <div class="dashboard-card" onclick="navigateTo('citas.html')">
+                            <h3>Mis Citas</h3>
+                            <p>Ver y crear citas médicas</p>
+                        </div>
+                        <div class="dashboard-card" onclick="navigateTo('historial.html')">
+                            <h3>Historial Médico</h3>
+                            <p>Ver historial de mis mascotas</p>
+                        </div>
+                        <div class="dashboard-card" onclick="navigateTo('perfil.html')">
+                            <h3>Mi Perfil</h3>
+                            <p>Editar información personal</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard para Veterinario -->
+                <div id="veterinarioDashboard" class="role-dashboard" style="display: none;">
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card" onclick="navigateTo('mascotas.html')">
+                            <h3>Ver Mascotas</h3>
+                            <p>Ver todas las mascotas</p>
+                        </div>
+                        <div class="dashboard-card" onclick="navigateTo('historial.html')">
+                            <h3>Historiales Médicos</h3>
+                            <p>Gestionar historiales</p>
+                        </div>
+                        <div class="dashboard-card" onclick="navigateTo('citas.html')">
+                            <h3>Gestionar Citas</h3>
+                            <p>Ver y gestionar citas</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard para Recepcionista -->
+                <div id="recepcionistaDashboard" class="role-dashboard" style="display: none;">
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card" onclick="navigateTo('usuarios.html')">
+                            <h3>Gestionar Usuarios</h3>
+                            <p>Administrar usuarios</p>
+                        </div>
+                        <div class="dashboard-card" onclick="navigateTo('citas.html')">
+                            <h3>Agendar Citas</h3>
+                            <p>Ver y agendar citas</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard para Admin -->
+                <div id="adminDashboard" class="role-dashboard" style="display: none;">
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card" onclick="navigateTo('usuarios.html')">
+                            <h3>Gestionar Usuarios</h3>
+                            <p>Administrar todos los usuarios</p>
+                        </div>
+                        <div class="dashboard-card" onclick="navigateTo('mascotas.html')">
+                            <h3>Ver Todas las Mascotas</h3>
+                            <p>Ver todas las mascotas</p>
+                        </div>
+                        <div class="dashboard-card" onclick="navigateTo('historial.html')">
+                            <h3>Ver Todos los Historiales</h3>
+                            <p>Ver todos los historiales médicos</p>
+                        </div>
+                        <div class="dashboard-card" onclick="navigateTo('citas.html')">
+                            <h3>Ver Todas las Citas</h3>
+                            <p>Ver todas las citas</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="../js/auth.js"></script>
+    <script src="../js/router.js"></script>
+    <script src="../js/dashboard.js"></script>
+</body>
+</html> 

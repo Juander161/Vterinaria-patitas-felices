@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Citas - Patitas Felices</title>
+    <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <img src="../img/logo.png" alt="Patitas Felices">
+            </div>
+            <nav class="nav">
+                <button onclick="navigateTo('dashboard.html')" class="btn-secondary">Volver al Dashboard</button>
+                <button id="logoutBtn" class="btn-secondary">Cerrar Sesión</button>
+            </nav>
+        </header>
+
+        <main class="main-content">
+            <div class="appointments-container">
+                <div class="page-header">
+                    <h1>Gestión de Citas</h1>
+                    <button id="addAppointmentBtn" class="btn-primary">+ Nueva Cita</button>
+                </div>
+
+                <div id="appointmentsList" class="appointments-list">
+                    <!-- Las citas se cargarán dinámicamente aquí -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para agregar/editar cita -->
+    <div id="appointmentModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="appointmentModalTitle">Nueva Cita</h2>
+                <span class="close" id="closeAppointmentModal">&times;</span>
+            </div>
+            <form id="appointmentForm">
+                <div class="form-group">
+                    <label for="appointmentPet">Mascota</label>
+                    <select id="appointmentPet" name="mascotaId" required>
+                        <option value="">Seleccionar mascota</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="appointmentDate">Fecha</label>
+                    <input type="date" id="appointmentDate" name="fecha" required>
+                </div>
+                <div class="form-group">
+                    <label for="appointmentTime">Hora</label>
+                    <input type="time" id="appointmentTime" name="hora" required>
+                </div>
+                <div class="form-group">
+                    <label for="appointmentReason">Motivo</label>
+                    <textarea id="appointmentReason" name="motivo" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="appointmentStatus">Estado</label>
+                    <select id="appointmentStatus" name="estado">
+                        <option value="programada">Programada</option>
+                        <option value="confirmada">Confirmada</option>
+                        <option value="completada">Completada</option>
+                        <option value="cancelada">Cancelada</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Guardar</button>
+                    <button type="button" id="cancelAppointmentBtn" class="btn-secondary">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/router.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/citas.js"></script>
+</body>
+</html> 
