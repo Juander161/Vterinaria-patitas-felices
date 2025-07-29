@@ -41,31 +41,37 @@
             </div>
             <form id="appointmentForm">
                 <div class="form-group">
-                    <label for="appointmentPet">Mascota</label>
-                    <select id="appointmentPet" name="mascotaId" required>
+                    <label for="appointmentPet">Mascota *</label>
+                    <select id="appointmentPet" name="id_mascota" required>
                         <option value="">Seleccionar mascota</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="appointmentDate">Fecha</label>
-                    <input type="date" id="appointmentDate" name="fecha" required>
+                    <label for="appointmentVet">Veterinario *</label>
+                    <select id="appointmentVet" name="id_veterinario" required>
+                        <option value="">Seleccionar veterinario</option>
+                    </select>
                 </div>
                 <div class="form-group">
-                    <label for="appointmentTime">Hora</label>
-                    <input type="time" id="appointmentTime" name="hora" required>
+                    <label for="appointmentDateTime">Fecha y Hora *</label>
+                    <input type="datetime-local" id="appointmentDateTime" name="fecha_hora" required>
                 </div>
                 <div class="form-group">
                     <label for="appointmentReason">Motivo</label>
-                    <textarea id="appointmentReason" name="motivo" required></textarea>
+                    <textarea id="appointmentReason" name="motivo" rows="3"></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="appointmentStatus">Estado</label>
-                    <select id="appointmentStatus" name="estado">
-                        <option value="programada">Programada</option>
-                        <option value="confirmada">Confirmada</option>
-                        <option value="completada">Completada</option>
-                        <option value="cancelada">Cancelada</option>
+                    <label for="appointmentStatus">Estado *</label>
+                    <select id="appointmentStatus" name="estado" required>
+                        <option value="">Seleccionar estado</option>
+                        <option value="Programada">Programada</option>
+                        <option value="Completada">Completada</option>
+                        <option value="Cancelada">Cancelada</option>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label for="appointmentNotes">Notas</label>
+                    <textarea id="appointmentNotes" name="notas" rows="3"></textarea>
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="btn-primary">Guardar</button>

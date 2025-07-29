@@ -10,8 +10,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Cargar lista de citas
     loadAppointments();
     
-    // Cargar mascotas para el formulario
+    // Cargar mascotas y veterinarios para el formulario
     loadPetsForForm();
+    loadVeterinariosForForm();
     
     // Configurar event listeners
     setupEventListeners();
@@ -50,22 +51,23 @@ function displayAppointments(citas) {
     }
 
     const appointmentsHTML = citas.map(cita => `
-        <div class="appointment-card" data-id="${cita.id}">
+        <div class="appointment-card" data-id="${cita._id || cita.id}">
             <div class="appointment-info">
-                <h3>Cita #${cita.id}</h3>
+                <h3>Cita #${cita._id || cita.id}</h3>
                 <p><strong>Mascota:</strong> ${cita.mascota?.nombre || 'N/A'}</p>
-                <p><strong>Fecha:</strong> ${formatDate(cita.fecha)}</p>
-                <p><strong>Hora:</strong> ${cita.hora}</p>
-                <p><strong>Motivo:</strong> ${cita.motivo}</p>
+                <p><strong>Veterinario:</strong> ${cita.veterinario?.nombre || 'N/A'}</p>
+                <p><strong>Fecha y Hora:</strong> ${formatDateTime(cita.fecha_hora)}</p>
+                <p><strong>Motivo:</strong> ${cita.motivo || 'N/A'}</p>
                 <p><strong>Estado:</strong> 
                     <span class="status-badge" style="background-color: ${getAppointmentStatusColor(cita.estado)}">
                         ${getAppointmentStatus(cita.estado)}
                     </span>
                 </p>
+                ${cita.notas ? `<p><strong>Notas:</strong> ${cita.notas}</p>` : ''}
             </div>
             <div class="appointment-actions">
-                <button class="btn-edit" onclick="editAppointment(${cita.id})">Editar</button>
-                <button class="btn-cancel" onclick="cancelAppointment(${cita.id})">Cancelar</button>
+                <button class="btn-edit" onclick="editAppointment('${cita._id || cita.id}')">Editar</button>
+                <button class="btn-cancel" onclick="cancelAppointment('${cita._id || cita.id}')">Cancelar</button>
             </div>
         </div>
     `).join('');
@@ -91,6 +93,24 @@ async function loadPetsForForm() {
     }
 }
 
+// Función para cargar veterinarios para el formulario
+async function loadVeterinariosForForm() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/usuarios?veterinarios=true`, {
+            headers: {
+                'Authorization': `Bearer ${auth.getToken()}`
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            populateVetSelect(data.usuarios || data); // La API puede devolver {usuarios: [...]} o directamente el array
+        }
+    } catch (error) {
+        console.error('Error al cargar veterinarios para formulario:', error);
+    }
+}
+
 // Función para poblar el select de mascotas
 function populatePetSelect(mascotas) {
     const petSelect = document.getElementById('appointmentPet');
@@ -98,12 +118,28 @@ function populatePetSelect(mascotas) {
 
     // Limpiar opciones existentes excepto la primera
     petSelect.innerHTML = '<option value="">Seleccionar mascota</option>';
-
+    
     mascotas.forEach(mascota => {
         const option = document.createElement('option');
-        option.value = mascota.id;
+        option.value = mascota._id || mascota.id;
         option.textContent = `${mascota.nombre} (${mascota.especie})`;
         petSelect.appendChild(option);
+    });
+}
+
+// Función para poblar el select de veterinarios
+function populateVetSelect(veterinarios) {
+    const vetSelect = document.getElementById('appointmentVet');
+    if (!vetSelect) return;
+
+    // Limpiar opciones existentes excepto la primera
+    vetSelect.innerHTML = '<option value="">Seleccionar veterinario</option>';
+    
+    veterinarios.forEach(veterinario => {
+        const option = document.createElement('option');
+        option.value = veterinario._id || veterinario.id;
+        option.textContent = `${veterinario.nombre} - ${veterinario.email}`;
+        vetSelect.appendChild(option);
     });
 }
 
@@ -152,40 +188,35 @@ function openAppointmentModal(appointmentId = null) {
     const modal = document.getElementById('appointmentModal');
     const modalTitle = document.getElementById('appointmentModalTitle');
     const form = document.getElementById('appointmentForm');
-
+    
     if (appointmentId) {
-        // Modo edición
         modalTitle.textContent = 'Editar Cita';
         loadAppointmentData(appointmentId);
         form.dataset.appointmentId = appointmentId;
     } else {
-        // Modo creación
         modalTitle.textContent = 'Nueva Cita';
         form.reset();
         delete form.dataset.appointmentId;
         
         // Establecer fecha mínima como hoy
-        const today = new Date().toISOString().split('T')[0];
-        const dateInput = form.querySelector('[name="fecha"]');
-        if (dateInput) {
-            dateInput.min = today;
+        const today = new Date();
+        const todayString = today.toISOString().slice(0, 16);
+        const dateTimeInput = form.querySelector('[name="fecha_hora"]');
+        if (dateTimeInput) {
+            dateTimeInput.min = todayString;
         }
     }
-
+    
     modal.style.display = 'block';
 }
 
 // Función para cerrar modal de cita
 function closeAppointmentModal() {
     const modal = document.getElementById('appointmentModal');
-    const form = document.getElementById('appointmentForm');
-    
     modal.style.display = 'none';
-    form.reset();
-    delete form.dataset.appointmentId;
 }
 
-// Función para cargar datos de una cita
+// Función para cargar datos de cita
 async function loadAppointmentData(appointmentId) {
     try {
         const response = await fetch(`${API_BASE_URL}/citas/${appointmentId}`, {
@@ -195,78 +226,83 @@ async function loadAppointmentData(appointmentId) {
         });
 
         if (response.ok) {
-            const data = await response.json();
-            fillAppointmentForm(data.cita || data); // La API puede devolver {cita: {...}} o directamente el objeto
+            const cita = await response.json();
+            fillAppointmentForm(cita);
         } else {
-            const errorData = await response.json();
-            showError(errorData.msg || errorData.message || 'Error al cargar datos de la cita');
+            showError('Error al cargar los datos de la cita');
         }
     } catch (error) {
-        console.error('Error al cargar cita:', error);
-        showError('Error al cargar datos de la cita');
+        console.error('Error al cargar datos de cita:', error);
+        showError('Error al cargar los datos de la cita');
     }
 }
 
 // Función para llenar formulario con datos de cita
 function fillAppointmentForm(cita) {
     const form = document.getElementById('appointmentForm');
-    if (!form) return;
-
-    const fields = {
-        'mascotaId': cita.mascotaId,
-        'fecha': cita.fecha,
-        'hora': cita.hora,
-        'motivo': cita.motivo,
-        'estado': cita.estado
-    };
-
-    Object.keys(fields).forEach(fieldName => {
-        const field = form.querySelector(`[name="${fieldName}"]`);
-        if (field) {
-            field.value = fields[fieldName] || '';
-        }
-    });
+    
+    form.id_mascota.value = cita.id_mascota || '';
+    form.id_veterinario.value = cita.id_veterinario || '';
+    form.motivo.value = cita.motivo || '';
+    form.estado.value = cita.estado || '';
+    form.notas.value = cita.notas || '';
+    
+    // Formatear fecha y hora para input datetime-local
+    if (cita.fecha_hora) {
+        const fecha = new Date(cita.fecha_hora);
+        form.fecha_hora.value = fecha.toISOString().slice(0, 16);
+    }
 }
 
-// Función para manejar envío del formulario de cita
+// Función para manejar envío del formulario
 async function handleAppointmentSubmit(e) {
     e.preventDefault();
-
+    
     const form = e.target;
-    const formData = new FormData(form);
     const appointmentId = form.dataset.appointmentId;
-
+    
+    // Recopilar datos del formulario
+    const formData = new FormData(form);
     const appointmentData = {
-        mascotaId: parseInt(formData.get('mascotaId')),
-        fecha: formData.get('fecha'),
-        hora: formData.get('hora'),
+        id_mascota: formData.get('id_mascota'),
+        id_veterinario: formData.get('id_veterinario'),
+        fecha_hora: new Date(formData.get('fecha_hora')),
         motivo: formData.get('motivo'),
-        estado: formData.get('estado')
+        estado: formData.get('estado'),
+        notas: formData.get('notas')
     };
-
+    
     try {
-        const url = appointmentId ? 
-            `${API_BASE_URL}/citas/${appointmentId}` : 
-            `${API_BASE_URL}/citas`;
-        
-        const method = appointmentId ? 'PUT' : 'POST';
-
-        const response = await fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth.getToken()}`
-            },
-            body: JSON.stringify(appointmentData)
-        });
+        let response;
+        if (appointmentId) {
+            // Actualizar cita existente
+            response = await fetch(`${API_BASE_URL}/citas/${appointmentId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${auth.getToken()}`
+                },
+                body: JSON.stringify(appointmentData)
+            });
+        } else {
+            // Crear nueva cita
+            response = await fetch(`${API_BASE_URL}/citas`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${auth.getToken()}`
+                },
+                body: JSON.stringify(appointmentData)
+            });
+        }
 
         if (response.ok) {
-            showSuccess(appointmentId ? 'Cita actualizada correctamente' : 'Cita creada correctamente');
+            showSuccess(appointmentId ? 'Cita actualizada exitosamente' : 'Cita creada exitosamente');
             closeAppointmentModal();
             loadAppointments(); // Recargar lista
         } else {
-            const error = await response.json();
-            showError(error.msg || error.message || 'Error al guardar la cita');
+            const errorData = await response.json();
+            showError(errorData.msg || errorData.message || 'Error al guardar la cita');
         }
     } catch (error) {
         console.error('Error al guardar cita:', error);
@@ -281,7 +317,7 @@ function editAppointment(appointmentId) {
 
 // Función para cancelar cita
 async function cancelAppointment(appointmentId) {
-    if (!confirmAction('¿Estás seguro de que quieres cancelar esta cita?')) {
+    if (!confirm('¿Estás seguro de que quieres cancelar esta cita?')) {
         return;
     }
 
@@ -292,15 +328,15 @@ async function cancelAppointment(appointmentId) {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${auth.getToken()}`
             },
-            body: JSON.stringify({ estado: 'cancelada' })
+            body: JSON.stringify({ estado: 'Cancelada' })
         });
 
         if (response.ok) {
-            showSuccess('Cita cancelada correctamente');
+            showSuccess('Cita cancelada exitosamente');
             loadAppointments(); // Recargar lista
         } else {
-            const error = await response.json();
-            showError(error.msg || error.message || 'Error al cancelar la cita');
+            const errorData = await response.json();
+            showError(errorData.msg || errorData.message || 'Error al cancelar la cita');
         }
     } catch (error) {
         console.error('Error al cancelar cita:', error);
@@ -310,7 +346,7 @@ async function cancelAppointment(appointmentId) {
 
 // Función para eliminar cita
 async function deleteAppointment(appointmentId) {
-    if (!confirmAction('¿Estás seguro de que quieres eliminar esta cita?')) {
+    if (!confirm('¿Estás seguro de que quieres eliminar esta cita?')) {
         return;
     }
 
@@ -323,11 +359,11 @@ async function deleteAppointment(appointmentId) {
         });
 
         if (response.ok) {
-            showSuccess('Cita eliminada correctamente');
+            showSuccess('Cita eliminada exitosamente');
             loadAppointments(); // Recargar lista
         } else {
-            const error = await response.json();
-            showError(error.msg || error.message || 'Error al eliminar la cita');
+            const errorData = await response.json();
+            showError(errorData.msg || errorData.message || 'Error al eliminar la cita');
         }
     } catch (error) {
         console.error('Error al eliminar cita:', error);
@@ -341,9 +377,9 @@ function filterAppointmentsByStatus(status) {
     
     appointmentCards.forEach(card => {
         const statusElement = card.querySelector('.status-badge');
-        const appointmentStatus = statusElement.textContent.toLowerCase();
+        const cardStatus = statusElement ? statusElement.textContent.trim() : '';
         
-        if (status === 'todas' || appointmentStatus.includes(status.toLowerCase())) {
+        if (status === 'todos' || cardStatus === status) {
             card.style.display = 'block';
         } else {
             card.style.display = 'none';
@@ -354,12 +390,12 @@ function filterAppointmentsByStatus(status) {
 // Función para buscar citas
 function searchAppointments(query) {
     const appointmentCards = document.querySelectorAll('.appointment-card');
-    
+    const searchTerm = query.toLowerCase();
+
     appointmentCards.forEach(card => {
-        const petName = card.querySelector('p').textContent.toLowerCase();
-        const motivo = card.querySelectorAll('p')[3].textContent.toLowerCase();
+        const cardText = card.textContent.toLowerCase();
         
-        if (petName.includes(query.toLowerCase()) || motivo.includes(query.toLowerCase())) {
+        if (cardText.includes(searchTerm)) {
             card.style.display = 'block';
         } else {
             card.style.display = 'none';
@@ -367,9 +403,41 @@ function searchAppointments(query) {
     });
 }
 
-// Exportar funciones para uso global
-window.editAppointment = editAppointment;
-window.cancelAppointment = cancelAppointment;
-window.deleteAppointment = deleteAppointment;
-window.filterAppointmentsByStatus = filterAppointmentsByStatus;
-window.searchAppointments = searchAppointments; 
+// Función para obtener color del estado de la cita
+function getAppointmentStatusColor(status) {
+    const colors = {
+        'Programada': '#007bff',
+        'Completada': '#28a745',
+        'Cancelada': '#dc3545'
+    };
+    return colors[status] || '#6c757d';
+}
+
+// Función para obtener texto del estado de la cita
+function getAppointmentStatus(status) {
+    return status || 'Desconocido';
+}
+
+// Función para formatear fecha y hora
+function formatDateTime(dateTimeString) {
+    if (!dateTimeString) return 'N/A';
+    const date = new Date(dateTimeString);
+    return date.toLocaleString('es-ES', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+// Funciones de utilidad para mostrar mensajes
+function showSuccess(message) {
+    // Implementar según tu sistema de notificaciones
+    alert(message);
+}
+
+function showError(message) {
+    // Implementar según tu sistema de notificaciones
+    alert('Error: ' + message);
+} 

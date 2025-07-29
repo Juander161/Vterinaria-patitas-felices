@@ -41,24 +41,51 @@
             </div>
             <form id="petForm">
                 <div class="form-group">
-                    <label for="petName">Nombre</label>
+                    <label for="petName">Nombre *</label>
                     <input type="text" id="petName" name="nombre" required>
                 </div>
                 <div class="form-group">
-                    <label for="petSpecies">Especie</label>
-                    <input type="text" id="petSpecies" name="especie" required>
+                    <label for="petSpecies">Especie *</label>
+                    <select id="petSpecies" name="especie" required>
+                        <option value="">Seleccionar especie</option>
+                        <option value="Perro">Perro</option>
+                        <option value="Gato">Gato</option>
+                        <option value="Ave">Ave</option>
+                        <option value="Reptil">Reptil</option>
+                        <option value="Otro">Otro</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="petBreed">Raza</label>
-                    <input type="text" id="petBreed" name="raza" required>
+                    <input type="text" id="petBreed" name="raza">
                 </div>
                 <div class="form-group">
-                    <label for="petAge">Edad (años)</label>
-                    <input type="number" id="petAge" name="edad" min="0" step="0.1" required>
+                    <label for="petBirthDate">Fecha de Nacimiento</label>
+                    <input type="date" id="petBirthDate" name="fecha_nacimiento">
                 </div>
                 <div class="form-group">
-                    <label for="petWeight">Peso (kg)</label>
-                    <input type="number" id="petWeight" name="peso" min="0" step="0.1" required>
+                    <label for="petSex">Sexo</label>
+                    <select id="petSex" name="sexo">
+                        <option value="">Seleccionar sexo</option>
+                        <option value="Macho">Macho</option>
+                        <option value="Hembra">Hembra</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="petColor">Color</label>
+                    <input type="text" id="petColor" name="color">
+                </div>
+                <div class="form-group">
+                    <label for="petSterilized">Esterilizado</label>
+                    <select id="petSterilized" name="esterilizado">
+                        <option value="">Seleccionar</option>
+                        <option value="true">Sí</option>
+                        <option value="false">No</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="petPhoto">Foto (URL)</label>
+                    <input type="url" id="petPhoto" name="foto" placeholder="https://ejemplo.com/foto.jpg">
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="btn-primary">Guardar</button>

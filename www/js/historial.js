@@ -68,19 +68,20 @@ function displayHistories(historiales) {
     }
 
     const historiesHTML = historiales.map(historial => `
-        <div class="history-card" data-id="${historial.id}">
+        <div class="history-card" data-id="${historial._id || historial.id}">
             <div class="history-info">
-                <h3>Historial #${historial.id}</h3>
+                <h3>Historial #${historial._id || historial.id}</h3>
                 <p><strong>Mascota:</strong> ${historial.mascota?.nombre || 'N/A'}</p>
-                <p><strong>Fecha:</strong> ${formatDate(historial.fecha)}</p>
-                <p><strong>Síntomas:</strong> ${historial.sintomas}</p>
-                <p><strong>Diagnóstico:</strong> ${historial.diagnostico}</p>
-                <p><strong>Tratamiento:</strong> ${historial.tratamiento}</p>
-                ${historial.observaciones ? `<p><strong>Observaciones:</strong> ${historial.observaciones}</p>` : ''}
+                <p><strong>Vacunas:</strong> ${historial.vacunas?.length || 0} registradas</p>
+                <p><strong>Alergias:</strong> ${historial.alergias?.length || 0} registradas</p>
+                <p><strong>Cirugías:</strong> ${historial.cirugias?.length || 0} registradas</p>
+                <p><strong>Enfermedades Crónicas:</strong> ${historial.enfermedades_cronicas?.length || 0} registradas</p>
+                <p><strong>Medicamentos Actuales:</strong> ${historial.medicamentos_actuales?.length || 0} registrados</p>
+                ${historial.notas_generales ? `<p><strong>Notas:</strong> ${historial.notas_generales}</p>` : ''}
             </div>
             <div class="history-actions">
-                ${canEditHistory() ? `<button class="btn-edit" onclick="editHistory(${historial.id})">Editar</button>` : ''}
-                ${canDeleteHistory() ? `<button class="btn-delete" onclick="deleteHistory(${historial.id})">Eliminar</button>` : ''}
+                ${canEditHistory() ? `<button class="btn-edit" onclick="editHistory('${historial._id || historial.id}')">Editar</button>` : ''}
+                ${canDeleteHistory() ? `<button class="btn-delete" onclick="deleteHistory('${historial._id || historial.id}')">Eliminar</button>` : ''}
             </div>
         </div>
     `).join('');
@@ -100,7 +101,7 @@ function canDeleteHistory() {
     return userRole === 'admin';
 }
 
-// Función para cargar mascotas para el formulario de historial
+// Función para cargar mascotas para el formulario
 async function loadPetsForHistoryForm() {
     try {
         const response = await fetch(`${API_BASE_URL}/mascotas`, {
@@ -114,21 +115,21 @@ async function loadPetsForHistoryForm() {
             populateHistoryPetSelect(data.mascotas || data); // La API puede devolver {mascotas: [...]} o directamente el array
         }
     } catch (error) {
-        console.error('Error al cargar mascotas para formulario de historial:', error);
+        console.error('Error al cargar mascotas para historial:', error);
     }
 }
 
-// Función para poblar el select de mascotas para historial
+// Función para poblar el select de mascotas
 function populateHistoryPetSelect(mascotas) {
     const petSelect = document.getElementById('historyPet');
     if (!petSelect) return;
 
     // Limpiar opciones existentes excepto la primera
     petSelect.innerHTML = '<option value="">Seleccionar mascota</option>';
-
+    
     mascotas.forEach(mascota => {
         const option = document.createElement('option');
-        option.value = mascota.id;
+        option.value = mascota._id || mascota.id;
         option.textContent = `${mascota.nombre} (${mascota.especie})`;
         petSelect.appendChild(option);
     });
@@ -172,6 +173,178 @@ function setupEventListeners() {
             }
         });
     }
+
+    // Event listeners para agregar elementos dinámicos
+    setupDynamicFormListeners();
+}
+
+// Función para configurar listeners de formulario dinámico
+function setupDynamicFormListeners() {
+    const addVacunaBtn = document.getElementById('addVacunaBtn');
+    const addAlergiaBtn = document.getElementById('addAlergiaBtn');
+    const addCirugiaBtn = document.getElementById('addCirugiaBtn');
+    const addEnfermedadBtn = document.getElementById('addEnfermedadBtn');
+    const addMedicamentoBtn = document.getElementById('addMedicamentoBtn');
+
+    if (addVacunaBtn) {
+        addVacunaBtn.addEventListener('click', addVacunaField);
+    }
+    if (addAlergiaBtn) {
+        addAlergiaBtn.addEventListener('click', addAlergiaField);
+    }
+    if (addCirugiaBtn) {
+        addCirugiaBtn.addEventListener('click', addCirugiaField);
+    }
+    if (addEnfermedadBtn) {
+        addEnfermedadBtn.addEventListener('click', addEnfermedadField);
+    }
+    if (addMedicamentoBtn) {
+        addMedicamentoBtn.addEventListener('click', addMedicamentoField);
+    }
+}
+
+// Funciones para agregar campos dinámicos
+function addVacunaField() {
+    const container = document.getElementById('vacunasContainer');
+    const index = container.children.length;
+    
+    const vacunaItem = document.createElement('div');
+    vacunaItem.className = 'vacuna-item';
+    vacunaItem.innerHTML = `
+        <div class="form-group">
+            <label>Nombre de la Vacuna</label>
+            <input type="text" name="vacunas[${index}][nombre]" required>
+        </div>
+        <div class="form-group">
+            <label>Fecha de Aplicación</label>
+            <input type="date" name="vacunas[${index}][fecha]" required>
+        </div>
+        <div class="form-group">
+            <label>Próxima Fecha</label>
+            <input type="date" name="vacunas[${index}][proxima_fecha]" required>
+        </div>
+        <div class="form-group">
+            <label>Lote</label>
+            <input type="text" name="vacunas[${index}][lote]">
+        </div>
+        <div class="form-group">
+            <label>Veterinario</label>
+            <input type="text" name="vacunas[${index}][veterinario]">
+        </div>
+        <button type="button" class="btn-remove" onclick="removeField(this)">Eliminar</button>
+    `;
+    
+    container.appendChild(vacunaItem);
+}
+
+function addAlergiaField() {
+    const container = document.getElementById('alergiasContainer');
+    const index = container.children.length;
+    
+    const alergiaItem = document.createElement('div');
+    alergiaItem.className = 'alergia-item';
+    alergiaItem.innerHTML = `
+        <div class="form-group">
+            <label>Sustancia</label>
+            <input type="text" name="alergias[${index}][sustancia]">
+        </div>
+        <div class="form-group">
+            <label>Gravedad</label>
+            <select name="alergias[${index}][gravedad]">
+                <option value="">Seleccionar</option>
+                <option value="Leve">Leve</option>
+                <option value="Moderada">Moderada</option>
+                <option value="Severa">Severa</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Reacción</label>
+            <input type="text" name="alergias[${index}][reaccion]">
+        </div>
+        <button type="button" class="btn-remove" onclick="removeField(this)">Eliminar</button>
+    `;
+    
+    container.appendChild(alergiaItem);
+}
+
+function addCirugiaField() {
+    const container = document.getElementById('cirugiasContainer');
+    const index = container.children.length;
+    
+    const cirugiaItem = document.createElement('div');
+    cirugiaItem.className = 'cirugia-item';
+    cirugiaItem.innerHTML = `
+        <div class="form-group">
+            <label>Nombre de la Cirugía</label>
+            <input type="text" name="cirugias[${index}][nombre]">
+        </div>
+        <div class="form-group">
+            <label>Fecha</label>
+            <input type="date" name="cirugias[${index}][fecha]">
+        </div>
+        <div class="form-group">
+            <label>Veterinario</label>
+            <input type="text" name="cirugias[${index}][veterinario]">
+        </div>
+        <div class="form-group">
+            <label>Descripción</label>
+            <textarea name="cirugias[${index}][descripcion]"></textarea>
+        </div>
+        <div class="form-group">
+            <label>Complicaciones</label>
+            <textarea name="cirugias[${index}][complicaciones]"></textarea>
+        </div>
+        <button type="button" class="btn-remove" onclick="removeField(this)">Eliminar</button>
+    `;
+    
+    container.appendChild(cirugiaItem);
+}
+
+function addEnfermedadField() {
+    const container = document.getElementById('enfermedadesContainer');
+    const index = container.children.length;
+    
+    const enfermedadItem = document.createElement('div');
+    enfermedadItem.className = 'enfermedad-item';
+    enfermedadItem.innerHTML = `
+        <div class="form-group">
+            <label>Enfermedad</label>
+            <input type="text" name="enfermedades_cronicas[]">
+        </div>
+        <button type="button" class="btn-remove" onclick="removeField(this)">Eliminar</button>
+    `;
+    
+    container.appendChild(enfermedadItem);
+}
+
+function addMedicamentoField() {
+    const container = document.getElementById('medicamentosContainer');
+    const index = container.children.length;
+    
+    const medicamentoItem = document.createElement('div');
+    medicamentoItem.className = 'medicamento-item';
+    medicamentoItem.innerHTML = `
+        <div class="form-group">
+            <label>Nombre del Medicamento</label>
+            <input type="text" name="medicamentos_actuales[${index}][nombre]">
+        </div>
+        <div class="form-group">
+            <label>Dosis</label>
+            <input type="text" name="medicamentos_actuales[${index}][dosis]">
+        </div>
+        <div class="form-group">
+            <label>Frecuencia</label>
+            <input type="text" name="medicamentos_actuales[${index}][frecuencia]">
+        </div>
+        <button type="button" class="btn-remove" onclick="removeField(this)">Eliminar</button>
+    `;
+    
+    container.appendChild(medicamentoItem);
+}
+
+// Función para eliminar campos dinámicos
+function removeField(button) {
+    button.parentElement.remove();
 }
 
 // Función para abrir modal de historial
@@ -179,40 +352,44 @@ function openHistoryModal(historyId = null) {
     const modal = document.getElementById('historyModal');
     const modalTitle = document.getElementById('historyModalTitle');
     const form = document.getElementById('historyForm');
-
+    
     if (historyId) {
-        // Modo edición
         modalTitle.textContent = 'Editar Historial';
         loadHistoryData(historyId);
         form.dataset.historyId = historyId;
     } else {
-        // Modo creación
         modalTitle.textContent = 'Nuevo Historial';
         form.reset();
         delete form.dataset.historyId;
-        
-        // Establecer fecha mínima como hoy
-        const today = new Date().toISOString().split('T')[0];
-        const dateInput = form.querySelector('[name="fecha"]');
-        if (dateInput) {
-            dateInput.min = today;
-        }
+        // Limpiar campos dinámicos
+        clearDynamicFields();
     }
-
+    
     modal.style.display = 'block';
 }
 
 // Función para cerrar modal de historial
 function closeHistoryModal() {
     const modal = document.getElementById('historyModal');
-    const form = document.getElementById('historyForm');
-    
     modal.style.display = 'none';
-    form.reset();
-    delete form.dataset.historyId;
 }
 
-// Función para cargar datos de un historial
+// Función para limpiar campos dinámicos
+function clearDynamicFields() {
+    const containers = ['vacunasContainer', 'alergiasContainer', 'cirugiasContainer', 'enfermedadesContainer', 'medicamentosContainer'];
+    
+    containers.forEach(containerId => {
+        const container = document.getElementById(containerId);
+        if (container) {
+            // Mantener solo el primer elemento
+            while (container.children.length > 1) {
+                container.removeChild(container.lastChild);
+            }
+        }
+    });
+}
+
+// Función para cargar datos de historial
 async function loadHistoryData(historyId) {
     try {
         const response = await fetch(`${API_BASE_URL}/historiales/${historyId}`, {
@@ -222,80 +399,203 @@ async function loadHistoryData(historyId) {
         });
 
         if (response.ok) {
-            const data = await response.json();
-            fillHistoryForm(data.historial || data); // La API puede devolver {historial: {...}} o directamente el objeto
+            const historial = await response.json();
+            fillHistoryForm(historial);
         } else {
-            const errorData = await response.json();
-            showError(errorData.msg || errorData.message || 'Error al cargar datos del historial');
+            showError('Error al cargar los datos del historial');
         }
     } catch (error) {
-        console.error('Error al cargar historial:', error);
-        showError('Error al cargar datos del historial');
+        console.error('Error al cargar datos de historial:', error);
+        showError('Error al cargar los datos del historial');
     }
 }
 
 // Función para llenar formulario con datos de historial
 function fillHistoryForm(historial) {
     const form = document.getElementById('historyForm');
-    if (!form) return;
+    
+    // Campos básicos
+    form.id_mascota.value = historial.id_mascota || '';
+    form.notas_generales.value = historial.notas_generales || '';
+    
+    // Llenar arrays dinámicos
+    fillVacunas(historial.vacunas || []);
+    fillAlergias(historial.alergias || []);
+    fillCirugias(historial.cirugias || []);
+    fillEnfermedades(historial.enfermedades_cronicas || []);
+    fillMedicamentos(historial.medicamentos_actuales || []);
+}
 
-    const fields = {
-        'mascotaId': historial.mascotaId,
-        'fecha': historial.fecha,
-        'sintomas': historial.sintomas,
-        'diagnostico': historial.diagnostico,
-        'tratamiento': historial.tratamiento,
-        'observaciones': historial.observaciones
-    };
-
-    Object.keys(fields).forEach(fieldName => {
-        const field = form.querySelector(`[name="${fieldName}"]`);
-        if (field) {
-            field.value = fields[fieldName] || '';
+// Funciones para llenar arrays específicos
+function fillVacunas(vacunas) {
+    const container = document.getElementById('vacunasContainer');
+    container.innerHTML = '';
+    
+    if (vacunas.length === 0) {
+        addVacunaField();
+        return;
+    }
+    
+    vacunas.forEach((vacuna, index) => {
+        if (index === 0) {
+            addVacunaField();
+        } else {
+            addVacunaField();
         }
+        
+        const item = container.lastElementChild;
+        item.querySelector('[name*="[nombre]"]').value = vacuna.nombre || '';
+        item.querySelector('[name*="[fecha]"]').value = vacuna.fecha ? new Date(vacuna.fecha).toISOString().split('T')[0] : '';
+        item.querySelector('[name*="[proxima_fecha]"]').value = vacuna.proxima_fecha ? new Date(vacuna.proxima_fecha).toISOString().split('T')[0] : '';
+        item.querySelector('[name*="[lote]"]').value = vacuna.lote || '';
+        item.querySelector('[name*="[veterinario]"]').value = vacuna.veterinario || '';
     });
 }
 
-// Función para manejar envío del formulario de historial
+function fillAlergias(alergias) {
+    const container = document.getElementById('alergiasContainer');
+    container.innerHTML = '';
+    
+    if (alergias.length === 0) {
+        addAlergiaField();
+        return;
+    }
+    
+    alergias.forEach((alergia, index) => {
+        if (index === 0) {
+            addAlergiaField();
+        } else {
+            addAlergiaField();
+        }
+        
+        const item = container.lastElementChild;
+        item.querySelector('[name*="[sustancia]"]').value = alergia.sustancia || '';
+        item.querySelector('[name*="[gravedad]"]').value = alergia.gravedad || '';
+        item.querySelector('[name*="[reaccion]"]').value = alergia.reaccion || '';
+    });
+}
+
+function fillCirugias(cirugias) {
+    const container = document.getElementById('cirugiasContainer');
+    container.innerHTML = '';
+    
+    if (cirugias.length === 0) {
+        addCirugiaField();
+        return;
+    }
+    
+    cirugias.forEach((cirugia, index) => {
+        if (index === 0) {
+            addCirugiaField();
+        } else {
+            addCirugiaField();
+        }
+        
+        const item = container.lastElementChild;
+        item.querySelector('[name*="[nombre]"]').value = cirugia.nombre || '';
+        item.querySelector('[name*="[fecha]"]').value = cirugia.fecha ? new Date(cirugia.fecha).toISOString().split('T')[0] : '';
+        item.querySelector('[name*="[veterinario]"]').value = cirugia.veterinario || '';
+        item.querySelector('[name*="[descripcion]"]').value = cirugia.descripcion || '';
+        item.querySelector('[name*="[complicaciones]"]').value = cirugia.complicaciones || '';
+    });
+}
+
+function fillEnfermedades(enfermedades) {
+    const container = document.getElementById('enfermedadesContainer');
+    container.innerHTML = '';
+    
+    if (enfermedades.length === 0) {
+        addEnfermedadField();
+        return;
+    }
+    
+    enfermedades.forEach((enfermedad, index) => {
+        if (index === 0) {
+            addEnfermedadField();
+        } else {
+            addEnfermedadField();
+        }
+        
+        const item = container.lastElementChild;
+        item.querySelector('[name*="enfermedades_cronicas"]').value = enfermedad || '';
+    });
+}
+
+function fillMedicamentos(medicamentos) {
+    const container = document.getElementById('medicamentosContainer');
+    container.innerHTML = '';
+    
+    if (medicamentos.length === 0) {
+        addMedicamentoField();
+        return;
+    }
+    
+    medicamentos.forEach((medicamento, index) => {
+        if (index === 0) {
+            addMedicamentoField();
+        } else {
+            addMedicamentoField();
+        }
+        
+        const item = container.lastElementChild;
+        item.querySelector('[name*="[nombre]"]').value = medicamento.nombre || '';
+        item.querySelector('[name*="[dosis]"]').value = medicamento.dosis || '';
+        item.querySelector('[name*="[frecuencia]"]').value = medicamento.frecuencia || '';
+    });
+}
+
+// Función para manejar envío del formulario
 async function handleHistorySubmit(e) {
     e.preventDefault();
-
+    
     const form = e.target;
-    const formData = new FormData(form);
     const historyId = form.dataset.historyId;
-
+    
+    // Recopilar datos del formulario
+    const formData = new FormData(form);
     const historyData = {
-        mascotaId: parseInt(formData.get('mascotaId')),
-        fecha: formData.get('fecha'),
-        sintomas: formData.get('sintomas'),
-        diagnostico: formData.get('diagnostico'),
-        tratamiento: formData.get('tratamiento'),
-        observaciones: formData.get('observaciones')
+        id_mascota: formData.get('id_mascota'),
+        notas_generales: formData.get('notas_generales')
     };
-
+    
+    // Procesar arrays dinámicos
+    historyData.vacunas = processVacunas(formData);
+    historyData.alergias = processAlergias(formData);
+    historyData.cirugias = processCirugias(formData);
+    historyData.enfermedades_cronicas = processEnfermedades(formData);
+    historyData.medicamentos_actuales = processMedicamentos(formData);
+    
     try {
-        const url = historyId ? 
-            `${API_BASE_URL}/historiales/${historyId}` : 
-            `${API_BASE_URL}/historiales`;
-        
-        const method = historyId ? 'PUT' : 'POST';
-
-        const response = await fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth.getToken()}`
-            },
-            body: JSON.stringify(historyData)
-        });
+        let response;
+        if (historyId) {
+            // Actualizar historial existente
+            response = await fetch(`${API_BASE_URL}/historiales/${historyId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${auth.getToken()}`
+                },
+                body: JSON.stringify(historyData)
+            });
+        } else {
+            // Crear nuevo historial
+            response = await fetch(`${API_BASE_URL}/historiales`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${auth.getToken()}`
+                },
+                body: JSON.stringify(historyData)
+            });
+        }
 
         if (response.ok) {
-            showSuccess(historyId ? 'Historial actualizado correctamente' : 'Historial creado correctamente');
+            showSuccess(historyId ? 'Historial actualizado exitosamente' : 'Historial creado exitosamente');
             closeHistoryModal();
             loadHistories(); // Recargar lista
         } else {
-            const error = await response.json();
-            showError(error.msg || error.message || 'Error al guardar el historial');
+            const errorData = await response.json();
+            showError(errorData.msg || errorData.message || 'Error al guardar el historial');
         }
     } catch (error) {
         console.error('Error al guardar historial:', error);
@@ -303,23 +603,116 @@ async function handleHistorySubmit(e) {
     }
 }
 
+// Funciones para procesar arrays del formulario
+function processVacunas(formData) {
+    const vacunas = [];
+    let index = 0;
+    
+    while (formData.get(`vacunas[${index}][nombre]`)) {
+        const vacuna = {
+            nombre: formData.get(`vacunas[${index}][nombre]`),
+            fecha: new Date(formData.get(`vacunas[${index}][fecha]`)),
+            proxima_fecha: new Date(formData.get(`vacunas[${index}][proxima_fecha]`)),
+            lote: formData.get(`vacunas[${index}][lote]`),
+            veterinario: formData.get(`vacunas[${index}][veterinario]`)
+        };
+        
+        if (vacuna.nombre && vacuna.fecha && vacuna.proxima_fecha) {
+            vacunas.push(vacuna);
+        }
+        
+        index++;
+    }
+    
+    return vacunas;
+}
+
+function processAlergias(formData) {
+    const alergias = [];
+    let index = 0;
+    
+    while (formData.get(`alergias[${index}][sustancia]`)) {
+        const alergia = {
+            sustancia: formData.get(`alergias[${index}][sustancia]`),
+            gravedad: formData.get(`alergias[${index}][gravedad]`),
+            reaccion: formData.get(`alergias[${index}][reaccion]`)
+        };
+        
+        if (alergia.sustancia) {
+            alergias.push(alergia);
+        }
+        
+        index++;
+    }
+    
+    return alergias;
+}
+
+function processCirugias(formData) {
+    const cirugias = [];
+    let index = 0;
+    
+    while (formData.get(`cirugias[${index}][nombre]`)) {
+        const cirugia = {
+            nombre: formData.get(`cirugias[${index}][nombre]`),
+            fecha: formData.get(`cirugias[${index}][fecha]`) ? new Date(formData.get(`cirugias[${index}][fecha]`)) : null,
+            veterinario: formData.get(`cirugias[${index}][veterinario]`),
+            descripcion: formData.get(`cirugias[${index}][descripcion]`),
+            complicaciones: formData.get(`cirugias[${index}][complicaciones]`)
+        };
+        
+        if (cirugia.nombre) {
+            cirugias.push(cirugia);
+        }
+        
+        index++;
+    }
+    
+    return cirugias;
+}
+
+function processEnfermedades(formData) {
+    const enfermedades = [];
+    const enfermedadesData = formData.getAll('enfermedades_cronicas[]');
+    
+    enfermedadesData.forEach(enfermedad => {
+        if (enfermedad.trim()) {
+            enfermedades.push(enfermedad.trim());
+        }
+    });
+    
+    return enfermedades;
+}
+
+function processMedicamentos(formData) {
+    const medicamentos = [];
+    let index = 0;
+    
+    while (formData.get(`medicamentos_actuales[${index}][nombre]`)) {
+        const medicamento = {
+            nombre: formData.get(`medicamentos_actuales[${index}][nombre]`),
+            dosis: formData.get(`medicamentos_actuales[${index}][dosis]`),
+            frecuencia: formData.get(`medicamentos_actuales[${index}][frecuencia]`)
+        };
+        
+        if (medicamento.nombre) {
+            medicamentos.push(medicamento);
+        }
+        
+        index++;
+    }
+    
+    return medicamentos;
+}
+
 // Función para editar historial
 function editHistory(historyId) {
-    if (!canEditHistory()) {
-        showError('No tienes permisos para editar historiales');
-        return;
-    }
     openHistoryModal(historyId);
 }
 
 // Función para eliminar historial
 async function deleteHistory(historyId) {
-    if (!canDeleteHistory()) {
-        showError('No tienes permisos para eliminar historiales');
-        return;
-    }
-
-    if (!confirmAction('¿Estás seguro de que quieres eliminar este historial?')) {
+    if (!confirm('¿Estás seguro de que quieres eliminar este historial?')) {
         return;
     }
 
@@ -332,11 +725,11 @@ async function deleteHistory(historyId) {
         });
 
         if (response.ok) {
-            showSuccess('Historial eliminado correctamente');
+            showSuccess('Historial eliminado exitosamente');
             loadHistories(); // Recargar lista
         } else {
-            const error = await response.json();
-            showError(error.msg || error.message || 'Error al eliminar el historial');
+            const errorData = await response.json();
+            showError(errorData.msg || errorData.message || 'Error al eliminar el historial');
         }
     } catch (error) {
         console.error('Error al eliminar historial:', error);
@@ -349,10 +742,9 @@ function filterHistoriesByPet(petId) {
     const historyCards = document.querySelectorAll('.history-card');
     
     historyCards.forEach(card => {
-        const petName = card.querySelector('p').textContent.toLowerCase();
-        const targetPet = document.querySelector(`option[value="${petId}"]`)?.textContent.toLowerCase();
+        const petName = card.querySelector('p').textContent;
         
-        if (petId === 'todas' || petName.includes(targetPet)) {
+        if (petId === 'todos' || petName.includes(petId)) {
             card.style.display = 'block';
         } else {
             card.style.display = 'none';
@@ -363,15 +755,12 @@ function filterHistoriesByPet(petId) {
 // Función para buscar historiales
 function searchHistories(query) {
     const historyCards = document.querySelectorAll('.history-card');
-    
+    const searchTerm = query.toLowerCase();
+
     historyCards.forEach(card => {
-        const petName = card.querySelector('p').textContent.toLowerCase();
-        const sintomas = card.querySelectorAll('p')[2].textContent.toLowerCase();
-        const diagnostico = card.querySelectorAll('p')[3].textContent.toLowerCase();
+        const cardText = card.textContent.toLowerCase();
         
-        if (petName.includes(query.toLowerCase()) || 
-            sintomas.includes(query.toLowerCase()) || 
-            diagnostico.includes(query.toLowerCase())) {
+        if (cardText.includes(searchTerm)) {
             card.style.display = 'block';
         } else {
             card.style.display = 'none';
@@ -379,8 +768,19 @@ function searchHistories(query) {
     });
 }
 
-// Exportar funciones para uso global
-window.editHistory = editHistory;
-window.deleteHistory = deleteHistory;
-window.filterHistoriesByPet = filterHistoriesByPet;
-window.searchHistories = searchHistories; 
+// Funciones de utilidad para mostrar mensajes
+function showSuccess(message) {
+    // Implementar según tu sistema de notificaciones
+    alert(message);
+}
+
+function showError(message) {
+    // Implementar según tu sistema de notificaciones
+    alert('Error: ' + message);
+}
+
+// Función para obtener el rol del usuario actual
+function getCurrentUserRole() {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    return user.rol || '';
+} 

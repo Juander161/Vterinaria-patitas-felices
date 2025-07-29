@@ -67,17 +67,18 @@ function displayUsers(usuarios) {
     }
 
     const usersHTML = usuarios.map(usuario => `
-        <div class="user-card" data-id="${usuario.id}">
+        <div class="user-card" data-id="${usuario._id || usuario.id}">
             <div class="user-info">
                 <h3>${usuario.nombre}</h3>
                 <p><strong>Email:</strong> ${usuario.email}</p>
                 <p><strong>Rol:</strong> ${getRoleDisplayName(usuario.rol)}</p>
                 <p><strong>Teléfono:</strong> ${usuario.telefono || 'N/A'}</p>
                 <p><strong>Dirección:</strong> ${usuario.direccion || 'N/A'}</p>
+                <p><strong>Fecha de registro:</strong> ${formatDate(usuario.fecha_registro)}</p>
             </div>
             <div class="user-actions">
-                ${canEditUser() ? `<button class="btn-edit" onclick="editUser(${usuario.id})">Editar</button>` : ''}
-                ${canDeleteUser(usuario.id) ? `<button class="btn-delete" onclick="deleteUser(${usuario.id})">Eliminar</button>` : ''}
+                ${canEditUser() ? `<button class="btn-edit" onclick="editUser('${usuario._id || usuario.id}')">Editar</button>` : ''}
+                ${canDeleteUser(usuario._id || usuario.id) ? `<button class="btn-delete" onclick="deleteUser('${usuario._id || usuario.id}')">Eliminar</button>` : ''}
             </div>
         </div>
     `).join('');
@@ -105,10 +106,15 @@ function canEditUser() {
 // Función para verificar si puede eliminar usuarios
 function canDeleteUser(userId) {
     const userRole = getCurrentUserRole();
-    const currentUserId = getCurrentUserId();
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
     
-    // Solo admin puede eliminar usuarios, y no puede eliminarse a sí mismo
-    return userRole === 'admin' && userId != currentUserId;
+    // Solo admin puede eliminar usuarios
+    if (userRole !== 'admin') return false;
+    
+    // No puede eliminarse a sí mismo
+    if (currentUser._id === userId || currentUser.id === userId) return false;
+    
+    return true;
 }
 
 // Función para configurar event listeners
@@ -156,47 +162,27 @@ function openUserModal(userId = null) {
     const modal = document.getElementById('userModal');
     const modalTitle = document.getElementById('userModalTitle');
     const form = document.getElementById('userForm');
-
+    
     if (userId) {
-        // Modo edición
         modalTitle.textContent = 'Editar Usuario';
         loadUserData(userId);
         form.dataset.userId = userId;
-        
-        // Ocultar campo de contraseña en edición
-        const passwordField = form.querySelector('[name="password"]');
-        if (passwordField) {
-            passwordField.required = false;
-            passwordField.placeholder = 'Dejar vacío para mantener la contraseña actual';
-        }
     } else {
-        // Modo creación
         modalTitle.textContent = 'Nuevo Usuario';
         form.reset();
         delete form.dataset.userId;
-        
-        // Mostrar campo de contraseña en creación
-        const passwordField = form.querySelector('[name="password"]');
-        if (passwordField) {
-            passwordField.required = true;
-            passwordField.placeholder = 'Contraseña';
-        }
     }
-
+    
     modal.style.display = 'block';
 }
 
 // Función para cerrar modal de usuario
 function closeUserModal() {
     const modal = document.getElementById('userModal');
-    const form = document.getElementById('userForm');
-    
     modal.style.display = 'none';
-    form.reset();
-    delete form.dataset.userId;
 }
 
-// Función para cargar datos de un usuario
+// Función para cargar datos de usuario
 async function loadUserData(userId) {
     try {
         const response = await fetch(`${API_BASE_URL}/usuarios/${userId}`, {
@@ -206,47 +192,44 @@ async function loadUserData(userId) {
         });
 
         if (response.ok) {
-            const data = await response.json();
-            fillUserForm(data.usuario || data); // La API puede devolver {usuario: {...}} o directamente el objeto
+            const usuario = await response.json();
+            fillUserForm(usuario);
         } else {
-            const errorData = await response.json();
-            showError(errorData.msg || errorData.message || 'Error al cargar datos del usuario');
+            showError('Error al cargar los datos del usuario');
         }
     } catch (error) {
-        console.error('Error al cargar usuario:', error);
-        showError('Error al cargar datos del usuario');
+        console.error('Error al cargar datos de usuario:', error);
+        showError('Error al cargar los datos del usuario');
     }
 }
 
 // Función para llenar formulario con datos de usuario
 function fillUserForm(usuario) {
     const form = document.getElementById('userForm');
-    if (!form) return;
-
-    const fields = {
-        'nombre': usuario.nombre,
-        'email': usuario.email,
-        'telefono': usuario.telefono,
-        'direccion': usuario.direccion,
-        'rol': usuario.rol
-    };
-
-    Object.keys(fields).forEach(fieldName => {
-        const field = form.querySelector(`[name="${fieldName}"]`);
-        if (field) {
-            field.value = fields[fieldName] || '';
-        }
-    });
+    
+    form.nombre.value = usuario.nombre || '';
+    form.email.value = usuario.email || '';
+    form.telefono.value = usuario.telefono || '';
+    form.direccion.value = usuario.direccion || '';
+    form.rol.value = usuario.rol || '';
+    
+    // En modo edición, hacer el campo de contraseña opcional
+    const passwordField = form.password;
+    if (passwordField) {
+        passwordField.required = false;
+        passwordField.placeholder = 'Dejar en blanco para mantener la contraseña actual';
+    }
 }
 
-// Función para manejar envío del formulario de usuario
+// Función para manejar envío del formulario
 async function handleUserSubmit(e) {
     e.preventDefault();
-
+    
     const form = e.target;
-    const formData = new FormData(form);
     const userId = form.dataset.userId;
-
+    
+    // Recopilar datos del formulario
+    const formData = new FormData(form);
     const userData = {
         nombre: formData.get('nombre'),
         email: formData.get('email'),
@@ -254,42 +237,44 @@ async function handleUserSubmit(e) {
         direccion: formData.get('direccion'),
         rol: formData.get('rol')
     };
-
-    // Solo incluir contraseña si se está creando un usuario nuevo o si se proporcionó
+    
+    // Agregar contraseña solo si se proporciona
     const password = formData.get('password');
-    if (password && password.trim()) {
+    if (password) {
         userData.password = password;
     }
-
+    
     try {
-        let url, method;
-        
+        let response;
         if (userId) {
             // Actualizar usuario existente
-            url = `${API_BASE_URL}/usuarios/${userId}`;
-            method = 'PUT';
+            response = await fetch(`${API_BASE_URL}/usuarios/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${auth.getToken()}`
+                },
+                body: JSON.stringify(userData)
+            });
         } else {
             // Crear nuevo usuario
-            url = `${API_BASE_URL}/auth/registro`;
-            method = 'POST';
+            response = await fetch(`${API_BASE_URL}/auth/registro`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${auth.getToken()}`
+                },
+                body: JSON.stringify(userData)
+            });
         }
 
-        const response = await fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth.getToken()}`
-            },
-            body: JSON.stringify(userData)
-        });
-
         if (response.ok) {
-            showSuccess(userId ? 'Usuario actualizado correctamente' : 'Usuario creado correctamente');
+            showSuccess(userId ? 'Usuario actualizado exitosamente' : 'Usuario creado exitosamente');
             closeUserModal();
             loadUsers(); // Recargar lista
         } else {
-            const error = await response.json();
-            showError(error.msg || error.message || 'Error al guardar el usuario');
+            const errorData = await response.json();
+            showError(errorData.msg || errorData.message || 'Error al guardar el usuario');
         }
     } catch (error) {
         console.error('Error al guardar usuario:', error);
@@ -299,21 +284,12 @@ async function handleUserSubmit(e) {
 
 // Función para editar usuario
 function editUser(userId) {
-    if (!canEditUser()) {
-        showError('No tienes permisos para editar usuarios');
-        return;
-    }
     openUserModal(userId);
 }
 
 // Función para eliminar usuario
 async function deleteUser(userId) {
-    if (!canDeleteUser(userId)) {
-        showError('No tienes permisos para eliminar usuarios');
-        return;
-    }
-
-    if (!confirmAction('¿Estás seguro de que quieres eliminar este usuario?')) {
+    if (!confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
         return;
     }
 
@@ -326,11 +302,11 @@ async function deleteUser(userId) {
         });
 
         if (response.ok) {
-            showSuccess('Usuario eliminado correctamente');
+            showSuccess('Usuario eliminado exitosamente');
             loadUsers(); // Recargar lista
         } else {
-            const error = await response.json();
-            showError(error.msg || error.message || 'Error al eliminar el usuario');
+            const errorData = await response.json();
+            showError(errorData.msg || errorData.message || 'Error al eliminar el usuario');
         }
     } catch (error) {
         console.error('Error al eliminar usuario:', error);
@@ -344,9 +320,9 @@ function filterUsersByRole(role) {
     
     userCards.forEach(card => {
         const roleElement = card.querySelector('p:nth-child(3)');
-        const userRole = roleElement.textContent.toLowerCase();
+        const cardRole = roleElement ? roleElement.textContent.toLowerCase() : '';
         
-        if (role === 'todos' || userRole.includes(role.toLowerCase())) {
+        if (role === 'todos' || cardRole.includes(role.toLowerCase())) {
             card.style.display = 'block';
         } else {
             card.style.display = 'none';
@@ -357,12 +333,13 @@ function filterUsersByRole(role) {
 // Función para buscar usuarios
 function searchUsers(query) {
     const userCards = document.querySelectorAll('.user-card');
-    
+    const searchTerm = query.toLowerCase();
+
     userCards.forEach(card => {
         const userName = card.querySelector('h3').textContent.toLowerCase();
-        const userEmail = card.querySelector('p').textContent.toLowerCase();
+        const userEmail = card.querySelector('p:nth-child(2)').textContent.toLowerCase();
         
-        if (userName.includes(query.toLowerCase()) || userEmail.includes(query.toLowerCase())) {
+        if (userName.includes(searchTerm) || userEmail.includes(searchTerm)) {
             card.style.display = 'block';
         } else {
             card.style.display = 'none';
@@ -370,8 +347,26 @@ function searchUsers(query) {
     });
 }
 
-// Exportar funciones para uso global
-window.editUser = editUser;
-window.deleteUser = deleteUser;
-window.filterUsersByRole = filterUsersByRole;
-window.searchUsers = searchUsers; 
+// Función para formatear fecha
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES');
+}
+
+// Funciones de utilidad para mostrar mensajes
+function showSuccess(message) {
+    // Implementar según tu sistema de notificaciones
+    alert(message);
+}
+
+function showError(message) {
+    // Implementar según tu sistema de notificaciones
+    alert('Error: ' + message);
+}
+
+// Función para obtener el rol del usuario actual
+function getCurrentUserRole() {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    return user.rol || '';
+} 

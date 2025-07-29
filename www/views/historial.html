@@ -41,31 +41,141 @@
             </div>
             <form id="historyForm">
                 <div class="form-group">
-                    <label for="historyPet">Mascota</label>
-                    <select id="historyPet" name="mascotaId" required>
+                    <label for="historyPet">Mascota *</label>
+                    <select id="historyPet" name="id_mascota" required>
                         <option value="">Seleccionar mascota</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="historyDate">Fecha</label>
-                    <input type="date" id="historyDate" name="fecha" required>
+                
+                <!-- Sección de Vacunas -->
+                <div class="form-section">
+                    <h3>Vacunas</h3>
+                    <div id="vacunasContainer">
+                        <div class="vacuna-item">
+                            <div class="form-group">
+                                <label>Nombre de la Vacuna</label>
+                                <input type="text" name="vacunas[0][nombre]" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Fecha de Aplicación</label>
+                                <input type="date" name="vacunas[0][fecha]" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Próxima Fecha</label>
+                                <input type="date" name="vacunas[0][proxima_fecha]" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Lote</label>
+                                <input type="text" name="vacunas[0][lote]">
+                            </div>
+                            <div class="form-group">
+                                <label>Veterinario</label>
+                                <input type="text" name="vacunas[0][veterinario]">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" id="addVacunaBtn" class="btn-secondary">+ Agregar Vacuna</button>
                 </div>
-                <div class="form-group">
-                    <label for="historySymptoms">Síntomas</label>
-                    <textarea id="historySymptoms" name="sintomas" required></textarea>
+
+                <!-- Sección de Alergias -->
+                <div class="form-section">
+                    <h3>Alergias</h3>
+                    <div id="alergiasContainer">
+                        <div class="alergia-item">
+                            <div class="form-group">
+                                <label>Sustancia</label>
+                                <input type="text" name="alergias[0][sustancia]">
+                            </div>
+                            <div class="form-group">
+                                <label>Gravedad</label>
+                                <select name="alergias[0][gravedad]">
+                                    <option value="">Seleccionar</option>
+                                    <option value="Leve">Leve</option>
+                                    <option value="Moderada">Moderada</option>
+                                    <option value="Severa">Severa</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Reacción</label>
+                                <input type="text" name="alergias[0][reaccion]">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" id="addAlergiaBtn" class="btn-secondary">+ Agregar Alergia</button>
                 </div>
-                <div class="form-group">
-                    <label for="historyDiagnosis">Diagnóstico</label>
-                    <textarea id="historyDiagnosis" name="diagnostico" required></textarea>
+
+                <!-- Sección de Cirugías -->
+                <div class="form-section">
+                    <h3>Cirugías</h3>
+                    <div id="cirugiasContainer">
+                        <div class="cirugia-item">
+                            <div class="form-group">
+                                <label>Nombre de la Cirugía</label>
+                                <input type="text" name="cirugias[0][nombre]">
+                            </div>
+                            <div class="form-group">
+                                <label>Fecha</label>
+                                <input type="date" name="cirugias[0][fecha]">
+                            </div>
+                            <div class="form-group">
+                                <label>Veterinario</label>
+                                <input type="text" name="cirugias[0][veterinario]">
+                            </div>
+                            <div class="form-group">
+                                <label>Descripción</label>
+                                <textarea name="cirugias[0][descripcion]"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Complicaciones</label>
+                                <textarea name="cirugias[0][complicaciones]"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" id="addCirugiaBtn" class="btn-secondary">+ Agregar Cirugía</button>
                 </div>
-                <div class="form-group">
-                    <label for="historyTreatment">Tratamiento</label>
-                    <textarea id="historyTreatment" name="tratamiento" required></textarea>
+
+                <!-- Enfermedades Crónicas -->
+                <div class="form-section">
+                    <h3>Enfermedades Crónicas</h3>
+                    <div id="enfermedadesContainer">
+                        <div class="enfermedad-item">
+                            <div class="form-group">
+                                <label>Enfermedad</label>
+                                <input type="text" name="enfermedades_cronicas[]">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" id="addEnfermedadBtn" class="btn-secondary">+ Agregar Enfermedad</button>
                 </div>
-                <div class="form-group">
-                    <label for="historyObservations">Observaciones</label>
-                    <textarea id="historyObservations" name="observaciones"></textarea>
+
+                <!-- Medicamentos Actuales -->
+                <div class="form-section">
+                    <h3>Medicamentos Actuales</h3>
+                    <div id="medicamentosContainer">
+                        <div class="medicamento-item">
+                            <div class="form-group">
+                                <label>Nombre del Medicamento</label>
+                                <input type="text" name="medicamentos_actuales[0][nombre]">
+                            </div>
+                            <div class="form-group">
+                                <label>Dosis</label>
+                                <input type="text" name="medicamentos_actuales[0][dosis]">
+                            </div>
+                            <div class="form-group">
+                                <label>Frecuencia</label>
+                                <input type="text" name="medicamentos_actuales[0][frecuencia]">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" id="addMedicamentoBtn" class="btn-secondary">+ Agregar Medicamento</button>
                 </div>
+
+                <!-- Notas Generales -->
+                <div class="form-group">
+                    <label for="historyNotes">Notas Generales</label>
+                    <textarea id="historyNotes" name="notas_generales" rows="4"></textarea>
+                </div>
+
                 <div class="form-actions">
                     <button type="submit" class="btn-primary">Guardar</button>
                     <button type="button" id="cancelHistoryBtn" class="btn-secondary">Cancelar</button>

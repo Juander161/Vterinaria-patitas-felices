@@ -47,17 +47,20 @@ function displayPets(mascotas) {
     }
 
     const petsHTML = mascotas.map(mascota => `
-        <div class="pet-card" data-id="${mascota.id}">
+        <div class="pet-card" data-id="${mascota._id || mascota.id}">
             <div class="pet-info">
                 <h3>${mascota.nombre}</h3>
                 <p><strong>Especie:</strong> ${mascota.especie}</p>
-                <p><strong>Raza:</strong> ${mascota.raza}</p>
-                <p><strong>Edad:</strong> ${mascota.edad} años</p>
-                <p><strong>Peso:</strong> ${mascota.peso} kg</p>
+                <p><strong>Raza:</strong> ${mascota.raza || 'N/A'}</p>
+                <p><strong>Sexo:</strong> ${mascota.sexo || 'N/A'}</p>
+                <p><strong>Color:</strong> ${mascota.color || 'N/A'}</p>
+                <p><strong>Esterilizado:</strong> ${mascota.esterilizado ? 'Sí' : 'No'}</p>
+                ${mascota.fecha_nacimiento ? `<p><strong>Fecha de nacimiento:</strong> ${formatDate(mascota.fecha_nacimiento)}</p>` : ''}
+                ${mascota.foto ? `<img src="${mascota.foto}" alt="${mascota.nombre}" class="pet-photo">` : ''}
             </div>
             <div class="pet-actions">
-                <button class="btn-edit" onclick="editPet(${mascota.id})">Editar</button>
-                <button class="btn-delete" onclick="deletePet(${mascota.id})">Eliminar</button>
+                <button class="btn-edit" onclick="editPet('${mascota._id || mascota.id}')">Editar</button>
+                <button class="btn-delete" onclick="deletePet('${mascota._id || mascota.id}')">Eliminar</button>
             </div>
         </div>
     `).join('');
@@ -110,33 +113,27 @@ function openPetModal(petId = null) {
     const modal = document.getElementById('petModal');
     const modalTitle = document.getElementById('modalTitle');
     const form = document.getElementById('petForm');
-
+    
     if (petId) {
-        // Modo edición
         modalTitle.textContent = 'Editar Mascota';
         loadPetData(petId);
         form.dataset.petId = petId;
     } else {
-        // Modo creación
         modalTitle.textContent = 'Nueva Mascota';
         form.reset();
         delete form.dataset.petId;
     }
-
+    
     modal.style.display = 'block';
 }
 
 // Función para cerrar modal de mascota
 function closePetModal() {
     const modal = document.getElementById('petModal');
-    const form = document.getElementById('petForm');
-    
     modal.style.display = 'none';
-    form.reset();
-    delete form.dataset.petId;
 }
 
-// Función para cargar datos de una mascota
+// Función para cargar datos de mascota
 async function loadPetData(petId) {
     try {
         const response = await fetch(`${API_BASE_URL}/mascotas/${petId}`, {
@@ -146,78 +143,92 @@ async function loadPetData(petId) {
         });
 
         if (response.ok) {
-            const data = await response.json();
-            fillPetForm(data.mascota || data); // La API puede devolver {mascota: {...}} o directamente el objeto
+            const mascota = await response.json();
+            fillPetForm(mascota);
         } else {
-            const errorData = await response.json();
-            showError(errorData.msg || errorData.message || 'Error al cargar datos de la mascota');
+            showError('Error al cargar los datos de la mascota');
         }
     } catch (error) {
-        console.error('Error al cargar mascota:', error);
-        showError('Error al cargar datos de la mascota');
+        console.error('Error al cargar datos de mascota:', error);
+        showError('Error al cargar los datos de la mascota');
     }
 }
 
 // Función para llenar formulario con datos de mascota
 function fillPetForm(mascota) {
     const form = document.getElementById('petForm');
-    if (!form) return;
-
-    const fields = {
-        'nombre': mascota.nombre,
-        'especie': mascota.especie,
-        'raza': mascota.raza,
-        'edad': mascota.edad,
-        'peso': mascota.peso
-    };
-
-    Object.keys(fields).forEach(fieldName => {
-        const field = form.querySelector(`[name="${fieldName}"]`);
-        if (field) {
-            field.value = fields[fieldName] || '';
-        }
-    });
+    
+    form.nombre.value = mascota.nombre || '';
+    form.especie.value = mascota.especie || '';
+    form.raza.value = mascota.raza || '';
+    form.sexo.value = mascota.sexo || '';
+    form.color.value = mascota.color || '';
+    form.esterilizado.value = mascota.esterilizado !== undefined ? mascota.esterilizado.toString() : '';
+    form.foto.value = mascota.foto || '';
+    
+    // Formatear fecha para input date
+    if (mascota.fecha_nacimiento) {
+        const fecha = new Date(mascota.fecha_nacimiento);
+        form.fecha_nacimiento.value = fecha.toISOString().split('T')[0];
+    }
 }
 
-// Función para manejar envío del formulario de mascota
+// Función para manejar envío del formulario
 async function handlePetSubmit(e) {
     e.preventDefault();
-
+    
     const form = e.target;
-    const formData = new FormData(form);
     const petId = form.dataset.petId;
-
+    
+    // Recopilar datos del formulario
+    const formData = new FormData(form);
     const petData = {
         nombre: formData.get('nombre'),
         especie: formData.get('especie'),
         raza: formData.get('raza'),
-        edad: parseFloat(formData.get('edad')),
-        peso: parseFloat(formData.get('peso'))
+        sexo: formData.get('sexo'),
+        color: formData.get('color'),
+        esterilizado: formData.get('esterilizado') === 'true',
+        foto: formData.get('foto')
     };
-
+    
+    // Agregar fecha de nacimiento si existe
+    const fechaNacimiento = formData.get('fecha_nacimiento');
+    if (fechaNacimiento) {
+        petData.fecha_nacimiento = new Date(fechaNacimiento);
+    }
+    
     try {
-        const url = petId ? 
-            `${API_BASE_URL}/mascotas/${petId}` : 
-            `${API_BASE_URL}/mascotas`;
-        
-        const method = petId ? 'PUT' : 'POST';
-
-        const response = await fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth.getToken()}`
-            },
-            body: JSON.stringify(petData)
-        });
+        let response;
+        if (petId) {
+            // Actualizar mascota existente
+            response = await fetch(`${API_BASE_URL}/mascotas/${petId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${auth.getToken()}`
+                },
+                body: JSON.stringify(petData)
+            });
+        } else {
+            // Crear nueva mascota
+            response = await fetch(`${API_BASE_URL}/mascotas`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${auth.getToken()}`
+                },
+                body: JSON.stringify(petData)
+            });
+        }
 
         if (response.ok) {
-            showSuccess(petId ? 'Mascota actualizada correctamente' : 'Mascota creada correctamente');
+            showSuccess(petId ? 'Mascota actualizada exitosamente' : 'Mascota creada exitosamente');
             closePetModal();
             loadPets(); // Recargar lista
         } else {
-            const error = await response.json();
-            showError(error.msg || error.message || 'Error al guardar la mascota');
+            const errorData = await response.json();
+            showError(errorData.msg || errorData.message || 'Error al guardar la mascota');
         }
     } catch (error) {
         console.error('Error al guardar mascota:', error);
@@ -232,7 +243,7 @@ function editPet(petId) {
 
 // Función para eliminar mascota
 async function deletePet(petId) {
-    if (!confirmAction('¿Estás seguro de que quieres eliminar esta mascota?')) {
+    if (!confirm('¿Estás seguro de que quieres eliminar esta mascota?')) {
         return;
     }
 
@@ -245,11 +256,11 @@ async function deletePet(petId) {
         });
 
         if (response.ok) {
-            showSuccess('Mascota eliminada correctamente');
+            showSuccess('Mascota eliminada exitosamente');
             loadPets(); // Recargar lista
         } else {
-            const error = await response.json();
-            showError(error.msg || error.message || 'Error al eliminar la mascota');
+            const errorData = await response.json();
+            showError(errorData.msg || errorData.message || 'Error al eliminar la mascota');
         }
     } catch (error) {
         console.error('Error al eliminar mascota:', error);
@@ -260,12 +271,13 @@ async function deletePet(petId) {
 // Función para buscar mascotas
 function searchPets(query) {
     const petCards = document.querySelectorAll('.pet-card');
-    
+    const searchTerm = query.toLowerCase();
+
     petCards.forEach(card => {
         const petName = card.querySelector('h3').textContent.toLowerCase();
         const petSpecies = card.querySelector('p').textContent.toLowerCase();
         
-        if (petName.includes(query.toLowerCase()) || petSpecies.includes(query.toLowerCase())) {
+        if (petName.includes(searchTerm) || petSpecies.includes(searchTerm)) {
             card.style.display = 'block';
         } else {
             card.style.display = 'none';
@@ -278,9 +290,9 @@ function filterPetsBySpecies(species) {
     const petCards = document.querySelectorAll('.pet-card');
     
     petCards.forEach(card => {
-        const petSpecies = card.querySelector('p').textContent.toLowerCase();
+        const petSpecies = card.querySelector('p').textContent;
         
-        if (species === 'todas' || petSpecies.includes(species.toLowerCase())) {
+        if (species === 'todos' || petSpecies.includes(species)) {
             card.style.display = 'block';
         } else {
             card.style.display = 'none';
@@ -288,8 +300,20 @@ function filterPetsBySpecies(species) {
     });
 }
 
-// Exportar funciones para uso global
-window.editPet = editPet;
-window.deletePet = deletePet;
-window.searchPets = searchPets;
-window.filterPetsBySpecies = filterPetsBySpecies; 
+// Función para formatear fecha
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES');
+}
+
+// Funciones de utilidad para mostrar mensajes
+function showSuccess(message) {
+    // Implementar según tu sistema de notificaciones
+    alert(message);
+}
+
+function showError(message) {
+    // Implementar según tu sistema de notificaciones
+    alert('Error: ' + message);
+} 
