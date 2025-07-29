@@ -45,10 +45,11 @@ async function loadHistories() {
         });
 
         if (response.ok) {
-            const historiales = await response.json();
-            displayHistories(historiales);
+            const data = await response.json();
+            displayHistories(data.historiales || data); // La API puede devolver {historiales: [...]} o directamente el array
         } else {
-            showError('Error al cargar los historiales médicos');
+            const errorData = await response.json();
+            showError(errorData.msg || errorData.message || 'Error al cargar los historiales médicos');
         }
     } catch (error) {
         console.error('Error al cargar historiales:', error);
@@ -109,8 +110,8 @@ async function loadPetsForHistoryForm() {
         });
 
         if (response.ok) {
-            const mascotas = await response.json();
-            populateHistoryPetSelect(mascotas);
+            const data = await response.json();
+            populateHistoryPetSelect(data.mascotas || data); // La API puede devolver {mascotas: [...]} o directamente el array
         }
     } catch (error) {
         console.error('Error al cargar mascotas para formulario de historial:', error);
@@ -221,10 +222,11 @@ async function loadHistoryData(historyId) {
         });
 
         if (response.ok) {
-            const historial = await response.json();
-            fillHistoryForm(historial);
+            const data = await response.json();
+            fillHistoryForm(data.historial || data); // La API puede devolver {historial: {...}} o directamente el objeto
         } else {
-            showError('Error al cargar datos del historial');
+            const errorData = await response.json();
+            showError(errorData.msg || errorData.message || 'Error al cargar datos del historial');
         }
     } catch (error) {
         console.error('Error al cargar historial:', error);
@@ -293,7 +295,7 @@ async function handleHistorySubmit(e) {
             loadHistories(); // Recargar lista
         } else {
             const error = await response.json();
-            showError(error.message || 'Error al guardar el historial');
+            showError(error.msg || error.message || 'Error al guardar el historial');
         }
     } catch (error) {
         console.error('Error al guardar historial:', error);
@@ -334,7 +336,7 @@ async function deleteHistory(historyId) {
             loadHistories(); // Recargar lista
         } else {
             const error = await response.json();
-            showError(error.message || 'Error al eliminar el historial');
+            showError(error.msg || error.message || 'Error al eliminar el historial');
         }
     } catch (error) {
         console.error('Error al eliminar historial:', error);

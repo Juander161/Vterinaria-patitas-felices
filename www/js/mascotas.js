@@ -24,10 +24,11 @@ async function loadPets() {
         });
 
         if (response.ok) {
-            const mascotas = await response.json();
-            displayPets(mascotas);
+            const data = await response.json();
+            displayPets(data.mascotas || data); // La API puede devolver {mascotas: [...]} o directamente el array
         } else {
-            showError('Error al cargar las mascotas');
+            const errorData = await response.json();
+            showError(errorData.msg || errorData.message || 'Error al cargar las mascotas');
         }
     } catch (error) {
         console.error('Error al cargar mascotas:', error);
@@ -145,10 +146,11 @@ async function loadPetData(petId) {
         });
 
         if (response.ok) {
-            const mascota = await response.json();
-            fillPetForm(mascota);
+            const data = await response.json();
+            fillPetForm(data.mascota || data); // La API puede devolver {mascota: {...}} o directamente el objeto
         } else {
-            showError('Error al cargar datos de la mascota');
+            const errorData = await response.json();
+            showError(errorData.msg || errorData.message || 'Error al cargar datos de la mascota');
         }
     } catch (error) {
         console.error('Error al cargar mascota:', error);
@@ -215,7 +217,7 @@ async function handlePetSubmit(e) {
             loadPets(); // Recargar lista
         } else {
             const error = await response.json();
-            showError(error.message || 'Error al guardar la mascota');
+            showError(error.msg || error.message || 'Error al guardar la mascota');
         }
     } catch (error) {
         console.error('Error al guardar mascota:', error);
@@ -247,7 +249,7 @@ async function deletePet(petId) {
             loadPets(); // Recargar lista
         } else {
             const error = await response.json();
-            showError(error.message || 'Error al eliminar la mascota');
+            showError(error.msg || error.message || 'Error al eliminar la mascota');
         }
     } catch (error) {
         console.error('Error al eliminar mascota:', error);

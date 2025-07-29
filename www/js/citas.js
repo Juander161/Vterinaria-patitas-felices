@@ -27,10 +27,11 @@ async function loadAppointments() {
         });
 
         if (response.ok) {
-            const citas = await response.json();
-            displayAppointments(citas);
+            const data = await response.json();
+            displayAppointments(data.citas || data); // La API puede devolver {citas: [...]} o directamente el array
         } else {
-            showError('Error al cargar las citas');
+            const errorData = await response.json();
+            showError(errorData.msg || errorData.message || 'Error al cargar las citas');
         }
     } catch (error) {
         console.error('Error al cargar citas:', error);
@@ -82,8 +83,8 @@ async function loadPetsForForm() {
         });
 
         if (response.ok) {
-            const mascotas = await response.json();
-            populatePetSelect(mascotas);
+            const data = await response.json();
+            populatePetSelect(data.mascotas || data); // La API puede devolver {mascotas: [...]} o directamente el array
         }
     } catch (error) {
         console.error('Error al cargar mascotas para formulario:', error);
@@ -194,10 +195,11 @@ async function loadAppointmentData(appointmentId) {
         });
 
         if (response.ok) {
-            const cita = await response.json();
-            fillAppointmentForm(cita);
+            const data = await response.json();
+            fillAppointmentForm(data.cita || data); // La API puede devolver {cita: {...}} o directamente el objeto
         } else {
-            showError('Error al cargar datos de la cita');
+            const errorData = await response.json();
+            showError(errorData.msg || errorData.message || 'Error al cargar datos de la cita');
         }
     } catch (error) {
         console.error('Error al cargar cita:', error);
@@ -264,7 +266,7 @@ async function handleAppointmentSubmit(e) {
             loadAppointments(); // Recargar lista
         } else {
             const error = await response.json();
-            showError(error.message || 'Error al guardar la cita');
+            showError(error.msg || error.message || 'Error al guardar la cita');
         }
     } catch (error) {
         console.error('Error al guardar cita:', error);
@@ -298,7 +300,7 @@ async function cancelAppointment(appointmentId) {
             loadAppointments(); // Recargar lista
         } else {
             const error = await response.json();
-            showError(error.message || 'Error al cancelar la cita');
+            showError(error.msg || error.message || 'Error al cancelar la cita');
         }
     } catch (error) {
         console.error('Error al cancelar cita:', error);
@@ -325,7 +327,7 @@ async function deleteAppointment(appointmentId) {
             loadAppointments(); // Recargar lista
         } else {
             const error = await response.json();
-            showError(error.message || 'Error al eliminar la cita');
+            showError(error.msg || error.message || 'Error al eliminar la cita');
         }
     } catch (error) {
         console.error('Error al eliminar cita:', error);

@@ -25,12 +25,12 @@ class Auth {
 
             if (response.ok) {
                 this.token = data.token;
-                this.user = data.user;
+                this.user = data.usuario; // La API devuelve 'usuario' en lugar de 'user'
                 localStorage.setItem('token', this.token);
                 localStorage.setItem('user', JSON.stringify(this.user));
                 return { success: true, user: this.user };
             } else {
-                throw new Error(data.message || 'Error en el login');
+                throw new Error(data.msg || data.message || 'Error en el login');
             }
         } catch (error) {
             console.error('Error en login:', error);
@@ -55,7 +55,7 @@ class Auth {
                 // Auto-login después del registro
                 return await this.login(userData.email, userData.password);
             } else {
-                throw new Error(data.message || 'Error en el registro');
+                throw new Error(data.msg || data.message || 'Error en el registro');
             }
         } catch (error) {
             console.error('Error en registro:', error);
@@ -73,10 +73,10 @@ class Auth {
             });
 
             if (response.ok) {
-                const user = await response.json();
-                this.user = user;
-                localStorage.setItem('user', JSON.stringify(user));
-                return user;
+                const data = await response.json();
+                this.user = data.usuario; // La API devuelve 'usuario'
+                localStorage.setItem('user', JSON.stringify(this.user));
+                return this.user;
             } else {
                 throw new Error('Error al obtener perfil');
             }

@@ -44,10 +44,11 @@ async function loadUsers() {
         });
 
         if (response.ok) {
-            const usuarios = await response.json();
-            displayUsers(usuarios);
+            const data = await response.json();
+            displayUsers(data.usuarios || data); // La API puede devolver {usuarios: [...]} o directamente el array
         } else {
-            showError('Error al cargar los usuarios');
+            const errorData = await response.json();
+            showError(errorData.msg || errorData.message || 'Error al cargar los usuarios');
         }
     } catch (error) {
         console.error('Error al cargar usuarios:', error);
@@ -205,10 +206,11 @@ async function loadUserData(userId) {
         });
 
         if (response.ok) {
-            const usuario = await response.json();
-            fillUserForm(usuario);
+            const data = await response.json();
+            fillUserForm(data.usuario || data); // La API puede devolver {usuario: {...}} o directamente el objeto
         } else {
-            showError('Error al cargar datos del usuario');
+            const errorData = await response.json();
+            showError(errorData.msg || errorData.message || 'Error al cargar datos del usuario');
         }
     } catch (error) {
         console.error('Error al cargar usuario:', error);
@@ -287,7 +289,7 @@ async function handleUserSubmit(e) {
             loadUsers(); // Recargar lista
         } else {
             const error = await response.json();
-            showError(error.message || 'Error al guardar el usuario');
+            showError(error.msg || error.message || 'Error al guardar el usuario');
         }
     } catch (error) {
         console.error('Error al guardar usuario:', error);
@@ -328,7 +330,7 @@ async function deleteUser(userId) {
             loadUsers(); // Recargar lista
         } else {
             const error = await response.json();
-            showError(error.message || 'Error al eliminar el usuario');
+            showError(error.msg || error.message || 'Error al eliminar el usuario');
         }
     } catch (error) {
         console.error('Error al eliminar usuario:', error);

@@ -108,14 +108,15 @@ async function handleProfileUpdate(e) {
             showSuccess('Perfil actualizado correctamente');
             
             // Actualizar datos en localStorage
-            const updatedUser = await response.json();
+            const data = await response.json();
+            const updatedUser = data.usuario || data;
             localStorage.setItem('user', JSON.stringify(updatedUser));
             
             // Recargar datos del perfil
             await loadProfile();
         } else {
             const error = await response.json();
-            showError(error.message || 'Error al actualizar el perfil');
+            showError(error.msg || error.message || 'Error al actualizar el perfil');
         }
     } catch (error) {
         console.error('Error al actualizar perfil:', error);
