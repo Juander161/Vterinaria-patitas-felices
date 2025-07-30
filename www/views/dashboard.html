@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Patitas Felices</title>
     <link rel="stylesheet" href="../css/estilos.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
@@ -17,7 +20,10 @@
                     <span id="userName"></span>
                     <span id="userRole"></span>
                 </div>
-                <button id="logoutBtn" class="btn-secondary">Cerrar Sesión</button>
+                <button id="logoutBtn" class="btn-secondary">
+                    <span style="margin-right: 0.5rem;">🚪</span>
+                    Cerrar Sesión
+                </button>
             </nav>
         </header>
 
@@ -29,20 +35,24 @@
                 <div id="clienteDashboard" class="role-dashboard" style="display: none;">
                     <div class="dashboard-grid">
                         <div class="dashboard-card" onclick="navigateTo('mascotas.html')">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🐕</div>
                             <h3>Mis Mascotas</h3>
-                            <p>Gestiona tus mascotas</p>
+                            <p>Gestiona tus mascotas y sus historiales médicos</p>
                         </div>
                         <div class="dashboard-card" onclick="navigateTo('citas.html')">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">📅</div>
                             <h3>Mis Citas</h3>
-                            <p>Ver y crear citas médicas</p>
+                            <p>Ver y crear citas médicas para tus mascotas</p>
                         </div>
                         <div class="dashboard-card" onclick="navigateTo('historial.html')">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
                             <h3>Historial Médico</h3>
-                            <p>Ver historial de mis mascotas</p>
+                            <p>Ver historial médico de mis mascotas</p>
                         </div>
                         <div class="dashboard-card" onclick="navigateTo('perfil.html')">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">👤</div>
                             <h3>Mi Perfil</h3>
-                            <p>Editar información personal</p>
+                            <p>Editar información personal y configuración</p>
                         </div>
                     </div>
                 </div>
@@ -51,16 +61,24 @@
                 <div id="veterinarioDashboard" class="role-dashboard" style="display: none;">
                     <div class="dashboard-grid">
                         <div class="dashboard-card" onclick="navigateTo('mascotas.html')">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🐾</div>
                             <h3>Ver Mascotas</h3>
-                            <p>Ver todas las mascotas</p>
+                            <p>Ver todas las mascotas registradas</p>
                         </div>
                         <div class="dashboard-card" onclick="navigateTo('historial.html')">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🏥</div>
                             <h3>Historiales Médicos</h3>
-                            <p>Gestionar historiales</p>
+                            <p>Gestionar historiales médicos</p>
                         </div>
                         <div class="dashboard-card" onclick="navigateTo('citas.html')">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
                             <h3>Gestionar Citas</h3>
-                            <p>Ver y gestionar citas</p>
+                            <p>Ver y gestionar citas médicas</p>
+                        </div>
+                        <div class="dashboard-card" onclick="navigateTo('perfil.html')">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">👨‍⚕️</div>
+                            <h3>Mi Perfil</h3>
+                            <p>Editar información profesional</p>
                         </div>
                     </div>
                 </div>
@@ -69,12 +87,19 @@
                 <div id="recepcionistaDashboard" class="role-dashboard" style="display: none;">
                     <div class="dashboard-grid">
                         <div class="dashboard-card" onclick="navigateTo('usuarios.html')">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">👥</div>
                             <h3>Gestionar Usuarios</h3>
-                            <p>Administrar usuarios</p>
+                            <p>Administrar usuarios del sistema</p>
                         </div>
                         <div class="dashboard-card" onclick="navigateTo('citas.html')">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">📞</div>
                             <h3>Agendar Citas</h3>
-                            <p>Ver y agendar citas</p>
+                            <p>Ver y agendar citas médicas</p>
+                        </div>
+                        <div class="dashboard-card" onclick="navigateTo('perfil.html')">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">👤</div>
+                            <h3>Mi Perfil</h3>
+                            <p>Editar información personal</p>
                         </div>
                     </div>
                 </div>
@@ -83,29 +108,36 @@
                 <div id="adminDashboard" class="role-dashboard" style="display: none;">
                     <div class="dashboard-grid">
                         <div class="dashboard-card" onclick="navigateTo('usuarios.html')">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">👑</div>
                             <h3>Gestionar Usuarios</h3>
-                            <p>Administrar todos los usuarios</p>
+                            <p>Administrar todos los usuarios del sistema</p>
                         </div>
                         <div class="dashboard-card" onclick="navigateTo('mascotas.html')">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🐕</div>
                             <h3>Ver Todas las Mascotas</h3>
-                            <p>Ver todas las mascotas</p>
+                            <p>Ver todas las mascotas registradas</p>
                         </div>
                         <div class="dashboard-card" onclick="navigateTo('historial.html')">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
                             <h3>Ver Todos los Historiales</h3>
                             <p>Ver todos los historiales médicos</p>
                         </div>
                         <div class="dashboard-card" onclick="navigateTo('citas.html')">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">📈</div>
                             <h3>Ver Todas las Citas</h3>
-                            <p>Ver todas las citas</p>
+                            <p>Ver todas las citas del sistema</p>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
+
+    <!-- Scripts -->
     <script src="../js/config.js"></script>
     <script src="../js/auth.js"></script>
     <script src="../js/router.js"></script>
+    <script src="../js/navigation.js"></script>
     <script src="../js/dashboard.js"></script>
 </body>
 </html> 

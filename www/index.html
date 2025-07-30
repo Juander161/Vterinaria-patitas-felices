@@ -1,36 +1,42 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="utf-8">
-    <meta name="format-detection" content="telephone=no">
-    <meta name="msapplication-tap-highlight" content="no">
-    <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
-    <meta name="color-scheme" content="light dark">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; media-src *; img-src 'self' data: content:;">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patitas Felices - Clínica Veterinaria</title>
+    <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/estilos.css">
-    <link rel="icon" type="image/x-icon" href="img/logo.png">
-    <title>Patitas Felices - Veterinaria</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <div class="loading-container">
-            <div class="logo">
-                <img src="img/logo.png" alt="Patitas Felices">
-            </div>
-            <h1>Patitas Felices</h1>
-            <p>Cargando aplicación...</p>
-            <div class="loading-spinner"></div>
-        </div>
+    <!-- Pantalla de carga -->
+    <div id="loadingScreen" class="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Cargando Patitas Felices...</div>
     </div>
-    
+
+    <!-- Pantalla principal -->
+    <div id="mainScreen" class="app" style="display: none;">
+        <div class="app-logo">
+            <img src="img/logo.png" alt="Patitas Felices">
+        </div>
+        <h1 class="app-title">Patitas Felices</h1>
+        <p class="app-subtitle">Clínica Veterinaria</p>
+        <button class="app-button" onclick="iniciarAplicacion()">
+            Iniciar Aplicación
+        </button>
+    </div>
+
     <!-- Cordova script will be injected by the CLI -->
     <script type="text/javascript" src="cordova.js"></script>
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/router.js"></script>
     <script>
-        // Redirigir a login después de que Cordova esté listo
-        document.addEventListener('deviceready', function() {
+        // Función para iniciar la aplicación
+        function iniciarAplicacion() {
             // Verificar si hay un token válido
             const token = localStorage.getItem('token');
             if (token) {
@@ -40,17 +46,36 @@
                 // Si no hay token, ir al login
                 window.location.href = 'views/login.html';
             }
+        }
+
+        // Función para mostrar la pantalla principal
+        function mostrarPantallaPrincipal() {
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('mainScreen').style.display = 'flex';
+        }
+
+        // Redirigir a login después de que Cordova esté listo
+        document.addEventListener('deviceready', function() {
+            console.log('Cordova está listo');
+            setTimeout(mostrarPantallaPrincipal, 2000);
         }, false);
         
         // Fallback para desarrollo web
         if (typeof cordova === 'undefined') {
+            console.log('Ejecutando en modo web');
+            setTimeout(mostrarPantallaPrincipal, 2000);
+        }
+
+        // Verificar si ya hay un token al cargar
+        document.addEventListener('DOMContentLoaded', function() {
             const token = localStorage.getItem('token');
             if (token) {
-                window.location.href = 'views/dashboard.html';
-            } else {
-                window.location.href = 'views/login.html';
+                // Si ya hay token, ir directamente al dashboard
+                setTimeout(() => {
+                    window.location.href = 'views/dashboard.html';
+                }, 1000);
             }
-        }
+        });
     </script>
 </body>
 </html>
