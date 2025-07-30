@@ -75,7 +75,7 @@ const api = new ApiService();
 // Funciones específicas para cada endpoint
 
 // USUARIOS
-export const usuariosAPI = {
+const usuariosAPI = {
     // Obtener todos los usuarios
     getAll: () => api.get('/usuarios'),
     
@@ -93,7 +93,7 @@ export const usuariosAPI = {
 };
 
 // MASCOTAS
-export const mascotasAPI = {
+const mascotasAPI = {
     // Obtener todas las mascotas (admin ve todas, cliente solo las suyas)
     getAll: () => api.get('/mascotas'),
     
@@ -111,7 +111,7 @@ export const mascotasAPI = {
 };
 
 // CITAS
-export const citasAPI = {
+const citasAPI = {
     // Obtener todas las citas
     getAll: () => api.get('/citas'),
     
@@ -129,7 +129,7 @@ export const citasAPI = {
 };
 
 // HISTORIALES MÉDICOS
-export const historialesAPI = {
+const historialesAPI = {
     // Obtener todos los historiales
     getAll: () => api.get('/historiales'),
     
@@ -147,7 +147,7 @@ export const historialesAPI = {
 };
 
 // AUTENTICACIÓN
-export const authAPI = {
+const authAPI = {
     // Login
     login: (credentials) => api.post('/auth/login', credentials),
     
@@ -158,5 +158,10 @@ export const authAPI = {
     getProfile: () => api.get('/auth/perfil')
 };
 
-// Exportar la instancia de API para uso directo
-export { api }; 
+// Exportar para uso global
+window.api = api;
+window.usuariosAPI = usuariosAPI;
+window.mascotasAPI = mascotasAPI;
+window.citasAPI = citasAPI;
+window.historialesAPI = historialesAPI;
+window.authAPI = authAPI; 

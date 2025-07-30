@@ -99,7 +99,16 @@ async function handleProfileUpdate(e) {
     };
 
     try {
+        // Verificar que getCurrentUserId esté disponible
+        if (typeof getCurrentUserId !== 'function') {
+            throw new Error('Función getCurrentUserId no está disponible');
+        }
+
         const userId = getCurrentUserId();
+        if (!userId) {
+            throw new Error('No se pudo obtener el ID del usuario');
+        }
+
         const response = await fetch(`${API_BASE_URL}/usuarios/${userId}`, {
             method: 'PUT',
             headers: {
@@ -129,7 +138,7 @@ async function handleProfileUpdate(e) {
         if (error.type === 'network') {
             notifications.showError('Error de conexión. Verifica tu conexión a internet.');
         } else {
-            notifications.showContextError('perfil', 'update');
+            notifications.showError(`Error al actualizar perfil: ${error.message}`);
         }
     }
 }

@@ -191,6 +191,25 @@ function setupEventListeners() {
     setupDynamicFormListeners();
 }
 
+// Función para asegurar que los textareas funcionen correctamente
+function ensureTextareaFunctionality() {
+    const textareas = document.querySelectorAll('textarea');
+    textareas.forEach(textarea => {
+        // Asegurar que el textarea sea redimensionable
+        textarea.style.resize = 'vertical';
+        textarea.style.minHeight = '60px';
+        textarea.style.maxHeight = '200px';
+        textarea.style.overflowY = 'auto';
+        
+        // Asegurar que el textarea sea interactivo
+        textarea.style.cursor = 'text';
+        textarea.style.userSelect = 'text';
+        textarea.style.webkitUserSelect = 'text';
+        textarea.style.mozUserSelect = 'text';
+        textarea.style.msUserSelect = 'text';
+    });
+}
+
 // Función para configurar listeners de formulario dinámico
 function setupDynamicFormListeners() {
     const addVacunaBtn = document.getElementById('addVacunaBtn');
@@ -301,16 +320,21 @@ function addCirugiaField() {
         </div>
         <div class="form-group">
             <label>Descripción</label>
-            <textarea name="cirugias[${index}][descripcion]" rows="3" style="resize: vertical; min-height: 80px;"></textarea>
+            <textarea name="cirugias[${index}][descripcion]" rows="3" style="resize: vertical; min-height: 80px; max-height: 150px; overflow-y: auto;"></textarea>
         </div>
         <div class="form-group">
             <label>Complicaciones</label>
-            <textarea name="cirugias[${index}][complicaciones]" rows="3" style="resize: vertical; min-height: 80px;"></textarea>
+            <textarea name="cirugias[${index}][complicaciones]" rows="3" style="resize: vertical; min-height: 80px; max-height: 150px; overflow-y: auto;"></textarea>
         </div>
         <button type="button" class="btn-remove" onclick="removeField(this)">Eliminar</button>
     `;
     
     container.appendChild(cirugiaItem);
+    
+    // Asegurar que los textareas funcionen correctamente
+    setTimeout(() => {
+        ensureTextareaFunctionality();
+    }, 100);
 }
 
 function addEnfermedadField() {
@@ -379,6 +403,11 @@ function openHistoryModal(historyId = null) {
     }
     
     modal.style.display = 'block';
+    
+    // Asegurar que los textareas funcionen correctamente después de abrir el modal
+    setTimeout(() => {
+        ensureTextareaFunctionality();
+    }, 200);
 }
 
 // Función para cerrar modal de historial
@@ -518,6 +547,11 @@ function fillCirugias(cirugias) {
         item.querySelector('[name*="[descripcion]"]').value = cirugia.descripcion || '';
         item.querySelector('[name*="[complicaciones]"]').value = cirugia.complicaciones || '';
     });
+    
+    // Asegurar que los textareas funcionen correctamente después de llenar los datos
+    setTimeout(() => {
+        ensureTextareaFunctionality();
+    }, 100);
 }
 
 function fillEnfermedades(enfermedades) {

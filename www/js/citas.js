@@ -111,6 +111,7 @@ async function loadPetsForForm() {
 // Función para cargar veterinarios para el formulario
 async function loadVeterinariosForForm() {
     try {
+        console.log('Cargando veterinarios...');
         const response = await fetch(`${API_BASE_URL}/usuarios`, {
             headers: {
                 'Authorization': `Bearer ${auth.getToken()}`
@@ -121,14 +122,32 @@ async function loadVeterinariosForForm() {
 
         if (data && data.success) {
             const usuarios = data.usuarios || data.data || [];
+            console.log('Usuarios cargados:', usuarios.length);
+            
             // Filtrar solo veterinarios
             const veterinarios = usuarios.filter(user => user.rol === 'veterinario');
+            console.log('Veterinarios encontrados:', veterinarios.length);
+            
             populateVetSelect(veterinarios);
         } else {
-            console.error('Error al cargar veterinarios');
+            console.error('Error al cargar veterinarios: respuesta no exitosa');
+            // Crear un veterinario por defecto para admin
+            const defaultVet = {
+                _id: 'default',
+                nombre: 'Veterinario por defecto',
+                email: 'veterinario@clinica.com'
+            };
+            populateVetSelect([defaultVet]);
         }
     } catch (error) {
         console.error('Error al cargar veterinarios para formulario:', error);
+        // En caso de error, crear un veterinario por defecto
+        const defaultVet = {
+            _id: 'default',
+            nombre: 'Veterinario por defecto',
+            email: 'veterinario@clinica.com'
+        };
+        populateVetSelect([defaultVet]);
     }
 }
 
@@ -303,11 +322,30 @@ async function handleAppointmentSubmit(e) {
         estado: formData.get('estado'),
         notas: formData.get('notas')
     };
-    
+
+    console.log('Datos de la cita:', appointmentData);
+
+    // Validar datos requeridos
+    if (!appointmentData.id_mascota) {
+        notifications.showError('Debes seleccionar una mascota');
+        return;
+    }
+
+    if (!appointmentData.id_veterinario) {
+        notifications.showError('Debes seleccionar un veterinario');
+        return;
+    }
+
+    if (!formData.get('fecha_hora')) {
+        notifications.showError('Debes seleccionar una fecha y hora');
+        return;
+    }
+
     try {
         let response;
         if (appointmentId) {
             // Actualizar cita existente
+            console.log('Actualizando cita:', appointmentId);
             response = await fetch(`${API_BASE_URL}/citas/${appointmentId}`, {
                 method: 'PUT',
                 headers: {
@@ -318,6 +356,7 @@ async function handleAppointmentSubmit(e) {
             });
         } else {
             // Crear nueva cita
+            console.log('Creando nueva cita');
             response = await fetch(`${API_BASE_URL}/citas`, {
                 method: 'POST',
                 headers: {
@@ -328,6 +367,7 @@ async function handleAppointmentSubmit(e) {
             });
         }
 
+        console.log('Respuesta del servidor:', response.status);
         const data = await handleApiResponse(response);
 
         if (data && data.success) {
@@ -336,6 +376,7 @@ async function handleAppointmentSubmit(e) {
             loadAppointments(); // Recargar lista
         } else {
             const errorMessage = data.msg || data.message || 'Error al guardar la cita';
+            console.error('Error en respuesta:', data);
             
             if (response.status === 400) {
                 notifications.showError('Datos inválidos. Verifica la información ingresada.');
@@ -351,7 +392,7 @@ async function handleAppointmentSubmit(e) {
         if (error.type === 'network') {
             notifications.showError('Error de conexión. Verifica tu conexión a internet.');
         } else {
-            notifications.showContextError('citas', appointmentId ? 'update' : 'create');
+            notifications.showError(`Error al guardar cita: ${error.message}`);
         }
     }
 }
