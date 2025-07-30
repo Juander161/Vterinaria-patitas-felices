@@ -21,11 +21,16 @@ async function loadProfile() {
         if (user) {
             fillProfileForm(user);
         } else {
-            showError('Error al cargar el perfil');
+            notifications.showContextError('perfil', 'load');
         }
     } catch (error) {
         console.error('Error al cargar perfil:', error);
-        showError('Error al cargar el perfil');
+        
+        if (error.type === 'network') {
+            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
+        } else {
+            notifications.showContextError('perfil', 'load');
+        }
     }
 }
 
@@ -105,7 +110,7 @@ async function handleProfileUpdate(e) {
         });
 
         if (response.ok) {
-            showSuccess('Perfil actualizado correctamente');
+            notifications.showSuccess('Perfil actualizado correctamente');
             
             // Actualizar datos en localStorage
             const data = await response.json();
@@ -116,11 +121,26 @@ async function handleProfileUpdate(e) {
             await loadProfile();
         } else {
             const error = await response.json();
-            showError(error.msg || error.message || 'Error al actualizar el perfil');
+            const errorMessage = error.msg || error.message || 'Error al actualizar el perfil';
+            
+            if (response.status === 400) {
+                notifications.showError('Datos inválidos. Verifica la información ingresada.');
+            } else if (response.status === 404) {
+                notifications.showError('Usuario no encontrado.');
+            } else if (response.status === 403) {
+                notifications.showError('No tienes permisos para actualizar este perfil.');
+            } else {
+                notifications.showError(errorMessage);
+            }
         }
     } catch (error) {
         console.error('Error al actualizar perfil:', error);
-        showError('Error al actualizar el perfil');
+        
+        if (error.type === 'network') {
+            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
+        } else {
+            notifications.showContextError('perfil', 'update');
+        }
     }
 }
 
@@ -146,7 +166,7 @@ function validateProfileForm(formData) {
 // Función para mostrar errores de validación
 function showValidationErrors(errors) {
     if (errors.length > 0) {
-        showError(errors.join('\n'));
+        notifications.showError(errors.join('\n'));
         return false;
     }
     return true;
@@ -189,16 +209,29 @@ async function changePassword(currentPassword, newPassword) {
         });
 
         if (response.ok) {
-            showSuccess('Contraseña actualizada correctamente');
+            notifications.showSuccess('Contraseña actualizada correctamente');
             return true;
         } else {
             const error = await response.json();
-            showError(error.message || 'Error al cambiar la contraseña');
+            const errorMessage = error.message || 'Error al cambiar la contraseña';
+            
+            if (response.status === 400) {
+                notifications.showError('La contraseña actual es incorrecta.');
+            } else if (response.status === 422) {
+                notifications.showError('La nueva contraseña no cumple con los requisitos.');
+            } else {
+                notifications.showError(errorMessage);
+            }
             return false;
         }
     } catch (error) {
         console.error('Error al cambiar contraseña:', error);
-        showError('Error al cambiar la contraseña');
+        
+        if (error.type === 'network') {
+            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
+        } else {
+            notifications.showContextError('perfil', 'password');
+        }
         return false;
     }
 }

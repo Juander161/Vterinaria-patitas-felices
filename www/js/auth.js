@@ -1,7 +1,31 @@
 // auth.js - Login, registro, token
 
 // Configuración de la API
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'http://localhost:3001/api';
+
+// Función para manejar respuestas de la API
+async function handleApiResponse(response) {
+    if (response.status === 200) {
+        const data = await response.json();
+        
+        if (data.success !== undefined) {
+            return data;
+        } else {
+            return {
+                success: true,
+                data: data
+            };
+        }
+    } else if (response.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = 'login.html';
+        return null;
+    } else {
+        const errorData = await response.json();
+        throw new Error(errorData.msg || errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+    }
+}
 
 // Funciones de autenticación
 class Auth {
@@ -21,16 +45,16 @@ class Auth {
                 body: JSON.stringify({ email, password })
             });
 
-            const data = await response.json();
+            const data = await handleApiResponse(response);
 
-            if (response.ok) {
+            if (data && data.success) {
                 this.token = data.token;
-                this.user = data.usuario; // La API devuelve 'usuario' en lugar de 'user'
+                this.user = data.usuario || data.user; // La API devuelve 'usuario' o 'user'
                 localStorage.setItem('token', this.token);
                 localStorage.setItem('user', JSON.stringify(this.user));
                 return { success: true, user: this.user };
             } else {
-                throw new Error(data.msg || data.message || 'Error en el login');
+                throw new Error(data?.message || 'Error en el login');
             }
         } catch (error) {
             console.error('Error en login:', error);
@@ -49,13 +73,13 @@ class Auth {
                 body: JSON.stringify(userData)
             });
 
-            const data = await response.json();
+            const data = await handleApiResponse(response);
 
-            if (response.ok) {
+            if (data && data.success) {
                 // Auto-login después del registro
                 return await this.login(userData.email, userData.password);
             } else {
-                throw new Error(data.msg || data.message || 'Error en el registro');
+                throw new Error(data?.message || 'Error en el registro');
             }
         } catch (error) {
             console.error('Error en registro:', error);
@@ -72,9 +96,10 @@ class Auth {
                 }
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                this.user = data.usuario; // La API devuelve 'usuario'
+            const data = await handleApiResponse(response);
+
+            if (data && data.success) {
+                this.user = data.usuario || data.user; // La API devuelve 'usuario' o 'user'
                 localStorage.setItem('user', JSON.stringify(this.user));
                 return this.user;
             } else {

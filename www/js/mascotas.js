@@ -25,14 +25,33 @@ async function loadPets() {
 
         if (response.ok) {
             const data = await response.json();
-            displayPets(data.mascotas || data); // La API puede devolver {mascotas: [...]} o directamente el array
+            const mascotas = data.mascotas || data;
+            
+            if (mascotas.length === 0) {
+                notifications.showInfo('No hay mascotas registradas');
+            }
+            
+            displayPets(mascotas);
         } else {
             const errorData = await response.json();
-            showError(errorData.msg || errorData.message || 'Error al cargar las mascotas');
+            const errorMessage = errorData.msg || errorData.message || 'Error al cargar las mascotas';
+            
+            if (response.status === 404) {
+                notifications.showContextError('mascotas', 'not_found');
+            } else if (response.status === 403) {
+                notifications.showContextError('mascotas', 'no_permission');
+            } else {
+                notifications.showError(errorMessage);
+            }
         }
     } catch (error) {
         console.error('Error al cargar mascotas:', error);
-        showError('Error al cargar las mascotas');
+        
+        if (error.type === 'network') {
+            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
+        } else {
+            notifications.showContextError('mascotas', 'load');
+        }
     }
 }
 
@@ -223,16 +242,29 @@ async function handlePetSubmit(e) {
         }
 
         if (response.ok) {
-            showSuccess(petId ? 'Mascota actualizada exitosamente' : 'Mascota creada exitosamente');
+            notifications.showSuccess(petId ? 'Mascota actualizada exitosamente' : 'Mascota creada exitosamente');
             closePetModal();
             loadPets(); // Recargar lista
         } else {
             const errorData = await response.json();
-            showError(errorData.msg || errorData.message || 'Error al guardar la mascota');
+            const errorMessage = errorData.msg || errorData.message || 'Error al guardar la mascota';
+            
+            if (response.status === 400) {
+                notifications.showError('Datos inválidos. Verifica la información ingresada.');
+            } else if (response.status === 409) {
+                notifications.showError('Ya existe una mascota con estos datos.');
+            } else {
+                notifications.showError(errorMessage);
+            }
         }
     } catch (error) {
         console.error('Error al guardar mascota:', error);
-        showError('Error al guardar la mascota');
+        
+        if (error.type === 'network') {
+            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
+        } else {
+            notifications.showContextError('mascotas', petId ? 'update' : 'create');
+        }
     }
 }
 
@@ -256,15 +288,28 @@ async function deletePet(petId) {
         });
 
         if (response.ok) {
-            showSuccess('Mascota eliminada exitosamente');
+            notifications.showSuccess('Mascota eliminada exitosamente');
             loadPets(); // Recargar lista
         } else {
             const errorData = await response.json();
-            showError(errorData.msg || errorData.message || 'Error al eliminar la mascota');
+            const errorMessage = errorData.msg || errorData.message || 'Error al eliminar la mascota';
+            
+            if (response.status === 403) {
+                notifications.showContextError('mascotas', 'no_permission');
+            } else if (response.status === 404) {
+                notifications.showError('La mascota no fue encontrada.');
+            } else {
+                notifications.showError(errorMessage);
+            }
         }
     } catch (error) {
         console.error('Error al eliminar mascota:', error);
-        showError('Error al eliminar la mascota');
+        
+        if (error.type === 'network') {
+            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
+        } else {
+            notifications.showContextError('mascotas', 'delete');
+        }
     }
 }
 
@@ -307,13 +352,11 @@ function formatDate(dateString) {
     return date.toLocaleDateString('es-ES');
 }
 
-// Funciones de utilidad para mostrar mensajes
+// Funciones de utilidad para mostrar mensajes (mantenidas para compatibilidad)
 function showSuccess(message) {
-    // Implementar según tu sistema de notificaciones
-    alert(message);
+    notifications.showSuccess(message);
 }
 
 function showError(message) {
-    // Implementar según tu sistema de notificaciones
-    alert('Error: ' + message);
+    notifications.showError(message);
 } 

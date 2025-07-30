@@ -1,7 +1,7 @@
 // api.js - Funciones fetch a la API
 
 // Configuración de la API
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'http://localhost:3001/api';
 
 // Clase para manejar las peticiones a la API
 class ApiService {
@@ -40,7 +40,13 @@ class ApiService {
             return response;
         } catch (error) {
             console.error('Error en petición API:', error);
-            throw error;
+            // Crear un objeto de error estructurado para mejor manejo
+            const structuredError = {
+                message: error.message || 'Error de conexión',
+                type: 'network',
+                original: error
+            };
+            throw structuredError;
         }
     }
 

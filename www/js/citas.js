@@ -29,14 +29,33 @@ async function loadAppointments() {
 
         if (response.ok) {
             const data = await response.json();
-            displayAppointments(data.citas || data); // La API puede devolver {citas: [...]} o directamente el array
+            const citas = data.citas || data;
+            
+            if (citas.length === 0) {
+                notifications.showInfo('No hay citas programadas');
+            }
+            
+            displayAppointments(citas);
         } else {
             const errorData = await response.json();
-            showError(errorData.msg || errorData.message || 'Error al cargar las citas');
+            const errorMessage = errorData.msg || errorData.message || 'Error al cargar las citas';
+            
+            if (response.status === 404) {
+                notifications.showContextError('citas', 'not_found');
+            } else if (response.status === 403) {
+                notifications.showContextError('citas', 'no_permission');
+            } else {
+                notifications.showError(errorMessage);
+            }
         }
     } catch (error) {
         console.error('Error al cargar citas:', error);
-        showError('Error al cargar las citas');
+        
+        if (error.type === 'network') {
+            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
+        } else {
+            notifications.showContextError('citas', 'load');
+        }
     }
 }
 
@@ -229,11 +248,20 @@ async function loadAppointmentData(appointmentId) {
             const cita = await response.json();
             fillAppointmentForm(cita);
         } else {
-            showError('Error al cargar los datos de la cita');
+            if (response.status === 404) {
+                notifications.showError('La cita no fue encontrada.');
+            } else {
+                notifications.showContextError('citas', 'load');
+            }
         }
     } catch (error) {
         console.error('Error al cargar datos de cita:', error);
-        showError('Error al cargar los datos de la cita');
+        
+        if (error.type === 'network') {
+            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
+        } else {
+            notifications.showContextError('citas', 'load');
+        }
     }
 }
 
@@ -297,16 +325,29 @@ async function handleAppointmentSubmit(e) {
         }
 
         if (response.ok) {
-            showSuccess(appointmentId ? 'Cita actualizada exitosamente' : 'Cita creada exitosamente');
+            notifications.showSuccess(appointmentId ? 'Cita actualizada exitosamente' : 'Cita creada exitosamente');
             closeAppointmentModal();
             loadAppointments(); // Recargar lista
         } else {
             const errorData = await response.json();
-            showError(errorData.msg || errorData.message || 'Error al guardar la cita');
+            const errorMessage = errorData.msg || errorData.message || 'Error al guardar la cita';
+            
+            if (response.status === 400) {
+                notifications.showError('Datos inválidos. Verifica la información ingresada.');
+            } else if (response.status === 409) {
+                notifications.showError('Ya existe una cita en ese horario.');
+            } else {
+                notifications.showError(errorMessage);
+            }
         }
     } catch (error) {
         console.error('Error al guardar cita:', error);
-        showError('Error al guardar la cita');
+        
+        if (error.type === 'network') {
+            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
+        } else {
+            notifications.showContextError('citas', appointmentId ? 'update' : 'create');
+        }
     }
 }
 
@@ -332,15 +373,26 @@ async function cancelAppointment(appointmentId) {
         });
 
         if (response.ok) {
-            showSuccess('Cita cancelada exitosamente');
+            notifications.showSuccess('Cita cancelada exitosamente');
             loadAppointments(); // Recargar lista
         } else {
             const errorData = await response.json();
-            showError(errorData.msg || errorData.message || 'Error al cancelar la cita');
+            const errorMessage = errorData.msg || errorData.message || 'Error al cancelar la cita';
+            
+            if (response.status === 404) {
+                notifications.showError('La cita no fue encontrada.');
+            } else {
+                notifications.showError(errorMessage);
+            }
         }
     } catch (error) {
         console.error('Error al cancelar cita:', error);
-        showError('Error al cancelar la cita');
+        
+        if (error.type === 'network') {
+            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
+        } else {
+            notifications.showContextError('citas', 'update');
+        }
     }
 }
 
@@ -359,15 +411,28 @@ async function deleteAppointment(appointmentId) {
         });
 
         if (response.ok) {
-            showSuccess('Cita eliminada exitosamente');
+            notifications.showSuccess('Cita eliminada exitosamente');
             loadAppointments(); // Recargar lista
         } else {
             const errorData = await response.json();
-            showError(errorData.msg || errorData.message || 'Error al eliminar la cita');
+            const errorMessage = errorData.msg || errorData.message || 'Error al eliminar la cita';
+            
+            if (response.status === 404) {
+                notifications.showError('La cita no fue encontrada.');
+            } else if (response.status === 403) {
+                notifications.showContextError('citas', 'no_permission');
+            } else {
+                notifications.showError(errorMessage);
+            }
         }
     } catch (error) {
         console.error('Error al eliminar cita:', error);
-        showError('Error al eliminar la cita');
+        
+        if (error.type === 'network') {
+            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
+        } else {
+            notifications.showContextError('citas', 'delete');
+        }
     }
 }
 
@@ -433,11 +498,9 @@ function formatDateTime(dateTimeString) {
 
 // Funciones de utilidad para mostrar mensajes
 function showSuccess(message) {
-    // Implementar según tu sistema de notificaciones
-    alert(message);
+    notifications.showSuccess(message);
 }
 
 function showError(message) {
-    // Implementar según tu sistema de notificaciones
-    alert('Error: ' + message);
+    notifications.showError(message);
 } 

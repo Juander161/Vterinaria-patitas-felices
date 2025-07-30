@@ -45,14 +45,33 @@ async function loadUsers() {
 
         if (response.ok) {
             const data = await response.json();
-            displayUsers(data.usuarios || data); // La API puede devolver {usuarios: [...]} o directamente el array
+            const usuarios = data.usuarios || data;
+            
+            if (usuarios.length === 0) {
+                notifications.showInfo('No hay usuarios registrados');
+            }
+            
+            displayUsers(usuarios);
         } else {
             const errorData = await response.json();
-            showError(errorData.msg || errorData.message || 'Error al cargar los usuarios');
+            const errorMessage = errorData.msg || errorData.message || 'Error al cargar los usuarios';
+            
+            if (response.status === 404) {
+                notifications.showContextError('usuarios', 'not_found');
+            } else if (response.status === 403) {
+                notifications.showContextError('usuarios', 'no_permission');
+            } else {
+                notifications.showError(errorMessage);
+            }
         }
     } catch (error) {
         console.error('Error al cargar usuarios:', error);
-        showError('Error al cargar los usuarios');
+        
+        if (error.type === 'network') {
+            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
+        } else {
+            notifications.showContextError('usuarios', 'load');
+        }
     }
 }
 
@@ -195,11 +214,20 @@ async function loadUserData(userId) {
             const usuario = await response.json();
             fillUserForm(usuario);
         } else {
-            showError('Error al cargar los datos del usuario');
+            if (response.status === 404) {
+                notifications.showError('El usuario no fue encontrado.');
+            } else {
+                notifications.showContextError('usuarios', 'load');
+            }
         }
     } catch (error) {
         console.error('Error al cargar datos de usuario:', error);
-        showError('Error al cargar los datos del usuario');
+        
+        if (error.type === 'network') {
+            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
+        } else {
+            notifications.showContextError('usuarios', 'load');
+        }
     }
 }
 
@@ -269,16 +297,31 @@ async function handleUserSubmit(e) {
         }
 
         if (response.ok) {
-            showSuccess(userId ? 'Usuario actualizado exitosamente' : 'Usuario creado exitosamente');
+            notifications.showSuccess(userId ? 'Usuario actualizado exitosamente' : 'Usuario creado exitosamente');
             closeUserModal();
             loadUsers(); // Recargar lista
         } else {
             const errorData = await response.json();
-            showError(errorData.msg || errorData.message || 'Error al guardar el usuario');
+            const errorMessage = errorData.msg || errorData.message || 'Error al guardar el usuario';
+            
+            if (response.status === 400) {
+                notifications.showError('Datos inválidos. Verifica la información ingresada.');
+            } else if (response.status === 409) {
+                notifications.showError('Ya existe un usuario con ese email.');
+            } else if (response.status === 403) {
+                notifications.showContextError('usuarios', 'no_permission');
+            } else {
+                notifications.showError(errorMessage);
+            }
         }
     } catch (error) {
         console.error('Error al guardar usuario:', error);
-        showError('Error al guardar el usuario');
+        
+        if (error.type === 'network') {
+            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
+        } else {
+            notifications.showContextError('usuarios', userId ? 'update' : 'create');
+        }
     }
 }
 
@@ -302,15 +345,28 @@ async function deleteUser(userId) {
         });
 
         if (response.ok) {
-            showSuccess('Usuario eliminado exitosamente');
+            notifications.showSuccess('Usuario eliminado exitosamente');
             loadUsers(); // Recargar lista
         } else {
             const errorData = await response.json();
-            showError(errorData.msg || errorData.message || 'Error al eliminar el usuario');
+            const errorMessage = errorData.msg || errorData.message || 'Error al eliminar el usuario';
+            
+            if (response.status === 404) {
+                notifications.showError('El usuario no fue encontrado.');
+            } else if (response.status === 403) {
+                notifications.showContextError('usuarios', 'no_permission');
+            } else {
+                notifications.showError(errorMessage);
+            }
         }
     } catch (error) {
         console.error('Error al eliminar usuario:', error);
-        showError('Error al eliminar el usuario');
+        
+        if (error.type === 'network') {
+            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
+        } else {
+            notifications.showContextError('usuarios', 'delete');
+        }
     }
 }
 
@@ -354,15 +410,13 @@ function formatDate(dateString) {
     return date.toLocaleDateString('es-ES');
 }
 
-// Funciones de utilidad para mostrar mensajes
+// Funciones de utilidad para mostrar mensajes (mantenidas para compatibilidad)
 function showSuccess(message) {
-    // Implementar según tu sistema de notificaciones
-    alert(message);
+    notifications.showSuccess(message);
 }
 
 function showError(message) {
-    // Implementar según tu sistema de notificaciones
-    alert('Error: ' + message);
+    notifications.showError(message);
 }
 
 // Función para obtener el rol del usuario actual

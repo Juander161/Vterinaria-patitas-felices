@@ -46,14 +46,33 @@ async function loadHistories() {
 
         if (response.ok) {
             const data = await response.json();
-            displayHistories(data.historiales || data); // La API puede devolver {historiales: [...]} o directamente el array
+            const historiales = data.historiales || data;
+            
+            if (historiales.length === 0) {
+                notifications.showInfo('No hay historiales médicos registrados');
+            }
+            
+            displayHistories(historiales);
         } else {
             const errorData = await response.json();
-            showError(errorData.msg || errorData.message || 'Error al cargar los historiales médicos');
+            const errorMessage = errorData.msg || errorData.message || 'Error al cargar los historiales médicos';
+            
+            if (response.status === 404) {
+                notifications.showContextError('historiales', 'not_found');
+            } else if (response.status === 403) {
+                notifications.showContextError('historiales', 'no_permission');
+            } else {
+                notifications.showError(errorMessage);
+            }
         }
     } catch (error) {
         console.error('Error al cargar historiales:', error);
-        showError('Error al cargar los historiales médicos');
+        
+        if (error.type === 'network') {
+            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
+        } else {
+            notifications.showContextError('historiales', 'load');
+        }
     }
 }
 
@@ -402,11 +421,20 @@ async function loadHistoryData(historyId) {
             const historial = await response.json();
             fillHistoryForm(historial);
         } else {
-            showError('Error al cargar los datos del historial');
+            if (response.status === 404) {
+                notifications.showError('El historial no fue encontrado.');
+            } else {
+                notifications.showContextError('historiales', 'load');
+            }
         }
     } catch (error) {
         console.error('Error al cargar datos de historial:', error);
-        showError('Error al cargar los datos del historial');
+        
+        if (error.type === 'network') {
+            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
+        } else {
+            notifications.showContextError('historiales', 'load');
+        }
     }
 }
 
@@ -590,16 +618,29 @@ async function handleHistorySubmit(e) {
         }
 
         if (response.ok) {
-            showSuccess(historyId ? 'Historial actualizado exitosamente' : 'Historial creado exitosamente');
+            notifications.showSuccess(historyId ? 'Historial actualizado exitosamente' : 'Historial creado exitosamente');
             closeHistoryModal();
             loadHistories(); // Recargar lista
         } else {
             const errorData = await response.json();
-            showError(errorData.msg || errorData.message || 'Error al guardar el historial');
+            const errorMessage = errorData.msg || errorData.message || 'Error al guardar el historial';
+            
+            if (response.status === 400) {
+                notifications.showError('Datos inválidos. Verifica la información ingresada.');
+            } else if (response.status === 403) {
+                notifications.showContextError('historiales', 'no_permission');
+            } else {
+                notifications.showError(errorMessage);
+            }
         }
     } catch (error) {
         console.error('Error al guardar historial:', error);
-        showError('Error al guardar el historial');
+        
+        if (error.type === 'network') {
+            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
+        } else {
+            notifications.showContextError('historiales', historyId ? 'update' : 'create');
+        }
     }
 }
 
@@ -725,15 +766,28 @@ async function deleteHistory(historyId) {
         });
 
         if (response.ok) {
-            showSuccess('Historial eliminado exitosamente');
+            notifications.showSuccess('Historial eliminado exitosamente');
             loadHistories(); // Recargar lista
         } else {
             const errorData = await response.json();
-            showError(errorData.msg || errorData.message || 'Error al eliminar el historial');
+            const errorMessage = errorData.msg || errorData.message || 'Error al eliminar el historial';
+            
+            if (response.status === 404) {
+                notifications.showError('El historial no fue encontrado.');
+            } else if (response.status === 403) {
+                notifications.showContextError('historiales', 'no_permission');
+            } else {
+                notifications.showError(errorMessage);
+            }
         }
     } catch (error) {
         console.error('Error al eliminar historial:', error);
-        showError('Error al eliminar el historial');
+        
+        if (error.type === 'network') {
+            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
+        } else {
+            notifications.showContextError('historiales', 'delete');
+        }
     }
 }
 
@@ -768,15 +822,13 @@ function searchHistories(query) {
     });
 }
 
-// Funciones de utilidad para mostrar mensajes
+// Funciones de utilidad para mostrar mensajes (mantenidas para compatibilidad)
 function showSuccess(message) {
-    // Implementar según tu sistema de notificaciones
-    alert(message);
+    notifications.showSuccess(message);
 }
 
 function showError(message) {
-    // Implementar según tu sistema de notificaciones
-    alert('Error: ' + message);
+    notifications.showError(message);
 }
 
 // Función para obtener el rol del usuario actual
