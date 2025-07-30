@@ -123,11 +123,11 @@
                             </div>
                             <div class="form-group">
                                 <label>Descripción</label>
-                                <textarea name="cirugias[0][descripcion]"></textarea>
+                                <textarea name="cirugias[0][descripcion]" rows="3" style="resize: vertical; min-height: 80px;"></textarea>
                             </div>
                             <div class="form-group">
                                 <label>Complicaciones</label>
-                                <textarea name="cirugias[0][complicaciones]"></textarea>
+                                <textarea name="cirugias[0][complicaciones]" rows="3" style="resize: vertical; min-height: 80px;"></textarea>
                             </div>
                         </div>
                     </div>
@@ -173,7 +173,7 @@
                 <!-- Notas Generales -->
                 <div class="form-group">
                     <label for="historyNotes">Notas Generales</label>
-                    <textarea id="historyNotes" name="notas_generales" rows="4"></textarea>
+                    <textarea id="historyNotes" name="notas_generales" rows="4" style="resize: vertical; min-height: 100px;"></textarea>
                 </div>
 
                 <div class="form-actions">
@@ -184,6 +184,7 @@
         </div>
     </div>
 
+    <script src="../js/config.js"></script>
     <script src="../js/auth.js"></script>
     <script src="../js/router.js"></script>
     <script src="../js/api.js"></script>

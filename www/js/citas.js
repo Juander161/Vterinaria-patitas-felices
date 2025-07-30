@@ -27,9 +27,10 @@ async function loadAppointments() {
             }
         });
 
-        if (response.ok) {
-            const data = await response.json();
-            const citas = data.citas || data;
+        const data = await handleApiResponse(response);
+
+        if (data && data.success) {
+            const citas = data.citas || data.data || [];
             
             if (citas.length === 0) {
                 notifications.showInfo('No hay citas programadas');
@@ -37,16 +38,7 @@ async function loadAppointments() {
             
             displayAppointments(citas);
         } else {
-            const errorData = await response.json();
-            const errorMessage = errorData.msg || errorData.message || 'Error al cargar las citas';
-            
-            if (response.status === 404) {
-                notifications.showContextError('citas', 'not_found');
-            } else if (response.status === 403) {
-                notifications.showContextError('citas', 'no_permission');
-            } else {
-                notifications.showError(errorMessage);
-            }
+            notifications.showError('Error al cargar las citas');
         }
     } catch (error) {
         console.error('Error al cargar citas:', error);
@@ -103,9 +95,13 @@ async function loadPetsForForm() {
             }
         });
 
-        if (response.ok) {
-            const data = await response.json();
-            populatePetSelect(data.mascotas || data); // La API puede devolver {mascotas: [...]} o directamente el array
+        const data = await handleApiResponse(response);
+
+        if (data && data.success) {
+            const mascotas = data.mascotas || data.data || [];
+            populatePetSelect(mascotas);
+        } else {
+            console.error('Error al cargar mascotas');
         }
     } catch (error) {
         console.error('Error al cargar mascotas para formulario:', error);
@@ -115,15 +111,21 @@ async function loadPetsForForm() {
 // Función para cargar veterinarios para el formulario
 async function loadVeterinariosForForm() {
     try {
-        const response = await fetch(`${API_BASE_URL}/usuarios?veterinarios=true`, {
+        const response = await fetch(`${API_BASE_URL}/usuarios`, {
             headers: {
                 'Authorization': `Bearer ${auth.getToken()}`
             }
         });
 
-        if (response.ok) {
-            const data = await response.json();
-            populateVetSelect(data.usuarios || data); // La API puede devolver {usuarios: [...]} o directamente el array
+        const data = await handleApiResponse(response);
+
+        if (data && data.success) {
+            const usuarios = data.usuarios || data.data || [];
+            // Filtrar solo veterinarios
+            const veterinarios = usuarios.filter(user => user.rol === 'veterinario');
+            populateVetSelect(veterinarios);
+        } else {
+            console.error('Error al cargar veterinarios');
         }
     } catch (error) {
         console.error('Error al cargar veterinarios para formulario:', error);
@@ -244,8 +246,10 @@ async function loadAppointmentData(appointmentId) {
             }
         });
 
-        if (response.ok) {
-            const cita = await response.json();
+        const data = await handleApiResponse(response);
+
+        if (data && data.success) {
+            const cita = data.cita || data.data;
             fillAppointmentForm(cita);
         } else {
             if (response.status === 404) {
@@ -324,13 +328,14 @@ async function handleAppointmentSubmit(e) {
             });
         }
 
-        if (response.ok) {
+        const data = await handleApiResponse(response);
+
+        if (data && data.success) {
             notifications.showSuccess(appointmentId ? 'Cita actualizada exitosamente' : 'Cita creada exitosamente');
             closeAppointmentModal();
             loadAppointments(); // Recargar lista
         } else {
-            const errorData = await response.json();
-            const errorMessage = errorData.msg || errorData.message || 'Error al guardar la cita';
+            const errorMessage = data.msg || data.message || 'Error al guardar la cita';
             
             if (response.status === 400) {
                 notifications.showError('Datos inválidos. Verifica la información ingresada.');
@@ -363,144 +368,4 @@ async function cancelAppointment(appointmentId) {
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/citas/${appointmentId}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${auth.getToken()}`
-            },
-            body: JSON.stringify({ estado: 'Cancelada' })
-        });
-
-        if (response.ok) {
-            notifications.showSuccess('Cita cancelada exitosamente');
-            loadAppointments(); // Recargar lista
-        } else {
-            const errorData = await response.json();
-            const errorMessage = errorData.msg || errorData.message || 'Error al cancelar la cita';
-            
-            if (response.status === 404) {
-                notifications.showError('La cita no fue encontrada.');
-            } else {
-                notifications.showError(errorMessage);
-            }
-        }
-    } catch (error) {
-        console.error('Error al cancelar cita:', error);
-        
-        if (error.type === 'network') {
-            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
-        } else {
-            notifications.showContextError('citas', 'update');
-        }
-    }
-}
-
-// Función para eliminar cita
-async function deleteAppointment(appointmentId) {
-    if (!confirm('¿Estás seguro de que quieres eliminar esta cita?')) {
-        return;
-    }
-
-    try {
-        const response = await fetch(`${API_BASE_URL}/citas/${appointmentId}`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${auth.getToken()}`
-            }
-        });
-
-        if (response.ok) {
-            notifications.showSuccess('Cita eliminada exitosamente');
-            loadAppointments(); // Recargar lista
-        } else {
-            const errorData = await response.json();
-            const errorMessage = errorData.msg || errorData.message || 'Error al eliminar la cita';
-            
-            if (response.status === 404) {
-                notifications.showError('La cita no fue encontrada.');
-            } else if (response.status === 403) {
-                notifications.showContextError('citas', 'no_permission');
-            } else {
-                notifications.showError(errorMessage);
-            }
-        }
-    } catch (error) {
-        console.error('Error al eliminar cita:', error);
-        
-        if (error.type === 'network') {
-            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
-        } else {
-            notifications.showContextError('citas', 'delete');
-        }
-    }
-}
-
-// Función para filtrar citas por estado
-function filterAppointmentsByStatus(status) {
-    const appointmentCards = document.querySelectorAll('.appointment-card');
-    
-    appointmentCards.forEach(card => {
-        const statusElement = card.querySelector('.status-badge');
-        const cardStatus = statusElement ? statusElement.textContent.trim() : '';
-        
-        if (status === 'todos' || cardStatus === status) {
-            card.style.display = 'block';
-        } else {
-            card.style.display = 'none';
-        }
-    });
-}
-
-// Función para buscar citas
-function searchAppointments(query) {
-    const appointmentCards = document.querySelectorAll('.appointment-card');
-    const searchTerm = query.toLowerCase();
-
-    appointmentCards.forEach(card => {
-        const cardText = card.textContent.toLowerCase();
-        
-        if (cardText.includes(searchTerm)) {
-            card.style.display = 'block';
-        } else {
-            card.style.display = 'none';
-        }
-    });
-}
-
-// Función para obtener color del estado de la cita
-function getAppointmentStatusColor(status) {
-    const colors = {
-        'Programada': '#007bff',
-        'Completada': '#28a745',
-        'Cancelada': '#dc3545'
-    };
-    return colors[status] || '#6c757d';
-}
-
-// Función para obtener texto del estado de la cita
-function getAppointmentStatus(status) {
-    return status || 'Desconocido';
-}
-
-// Función para formatear fecha y hora
-function formatDateTime(dateTimeString) {
-    if (!dateTimeString) return 'N/A';
-    const date = new Date(dateTimeString);
-    return date.toLocaleString('es-ES', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-}
-
-// Funciones de utilidad para mostrar mensajes
-function showSuccess(message) {
-    notifications.showSuccess(message);
-}
-
-function showError(message) {
-    notifications.showError(message);
-} 
+        const response = await fetch(`

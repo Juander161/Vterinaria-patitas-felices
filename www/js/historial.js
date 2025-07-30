@@ -44,9 +44,10 @@ async function loadHistories() {
             }
         });
 
-        if (response.ok) {
-            const data = await response.json();
-            const historiales = data.historiales || data;
+        const data = await handleApiResponse(response);
+
+        if (data && data.success) {
+            const historiales = data.historiales || data.data || [];
             
             if (historiales.length === 0) {
                 notifications.showInfo('No hay historiales médicos registrados');
@@ -54,16 +55,7 @@ async function loadHistories() {
             
             displayHistories(historiales);
         } else {
-            const errorData = await response.json();
-            const errorMessage = errorData.msg || errorData.message || 'Error al cargar los historiales médicos';
-            
-            if (response.status === 404) {
-                notifications.showContextError('historiales', 'not_found');
-            } else if (response.status === 403) {
-                notifications.showContextError('historiales', 'no_permission');
-            } else {
-                notifications.showError(errorMessage);
-            }
+            notifications.showError('Error al cargar los historiales médicos');
         }
     } catch (error) {
         console.error('Error al cargar historiales:', error);
@@ -129,9 +121,11 @@ async function loadPetsForHistoryForm() {
             }
         });
 
-        if (response.ok) {
-            const data = await response.json();
-            populateHistoryPetSelect(data.mascotas || data); // La API puede devolver {mascotas: [...]} o directamente el array
+        const data = await handleApiResponse(response);
+
+        if (data && data.success) {
+            const mascotas = data.mascotas || data.data || [];
+            populateHistoryPetSelect(mascotas);
         }
     } catch (error) {
         console.error('Error al cargar mascotas para historial:', error);
@@ -307,11 +301,11 @@ function addCirugiaField() {
         </div>
         <div class="form-group">
             <label>Descripción</label>
-            <textarea name="cirugias[${index}][descripcion]"></textarea>
+            <textarea name="cirugias[${index}][descripcion]" rows="3" style="resize: vertical; min-height: 80px;"></textarea>
         </div>
         <div class="form-group">
             <label>Complicaciones</label>
-            <textarea name="cirugias[${index}][complicaciones]"></textarea>
+            <textarea name="cirugias[${index}][complicaciones]" rows="3" style="resize: vertical; min-height: 80px;"></textarea>
         </div>
         <button type="button" class="btn-remove" onclick="removeField(this)">Eliminar</button>
     `;
@@ -417,15 +411,13 @@ async function loadHistoryData(historyId) {
             }
         });
 
-        if (response.ok) {
-            const historial = await response.json();
+        const data = await handleApiResponse(response);
+
+        if (data && data.success) {
+            const historial = data.historial || data.data;
             fillHistoryForm(historial);
         } else {
-            if (response.status === 404) {
-                notifications.showError('El historial no fue encontrado.');
-            } else {
-                notifications.showContextError('historiales', 'load');
-            }
+            notifications.showError('Error al cargar datos del historial.');
         }
     } catch (error) {
         console.error('Error al cargar datos de historial:', error);
@@ -617,21 +609,14 @@ async function handleHistorySubmit(e) {
             });
         }
 
-        if (response.ok) {
+        const data = await handleApiResponse(response);
+
+        if (data && data.success) {
             notifications.showSuccess(historyId ? 'Historial actualizado exitosamente' : 'Historial creado exitosamente');
             closeHistoryModal();
             loadHistories(); // Recargar lista
         } else {
-            const errorData = await response.json();
-            const errorMessage = errorData.msg || errorData.message || 'Error al guardar el historial';
-            
-            if (response.status === 400) {
-                notifications.showError('Datos inválidos. Verifica la información ingresada.');
-            } else if (response.status === 403) {
-                notifications.showContextError('historiales', 'no_permission');
-            } else {
-                notifications.showError(errorMessage);
-            }
+            notifications.showError('Error al guardar el historial.');
         }
     } catch (error) {
         console.error('Error al guardar historial:', error);
@@ -765,20 +750,13 @@ async function deleteHistory(historyId) {
             }
         });
 
-        if (response.ok) {
+        const data = await handleApiResponse(response);
+
+        if (data && data.success) {
             notifications.showSuccess('Historial eliminado exitosamente');
             loadHistories(); // Recargar lista
         } else {
-            const errorData = await response.json();
-            const errorMessage = errorData.msg || errorData.message || 'Error al eliminar el historial';
-            
-            if (response.status === 404) {
-                notifications.showError('El historial no fue encontrado.');
-            } else if (response.status === 403) {
-                notifications.showContextError('historiales', 'no_permission');
-            } else {
-                notifications.showError(errorMessage);
-            }
+            notifications.showError('Error al eliminar el historial.');
         }
     } catch (error) {
         console.error('Error al eliminar historial:', error);

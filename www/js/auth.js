@@ -1,32 +1,5 @@
 // auth.js - Login, registro, token
 
-// Configuración de la API
-const API_BASE_URL = 'http://localhost:3001/api';
-
-// Función para manejar respuestas de la API
-async function handleApiResponse(response) {
-    if (response.status === 200) {
-        const data = await response.json();
-        
-        if (data.success !== undefined) {
-            return data;
-        } else {
-            return {
-                success: true,
-                data: data
-            };
-        }
-    } else if (response.status === 401) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = 'login.html';
-        return null;
-    } else {
-        const errorData = await response.json();
-        throw new Error(errorData.msg || errorData.message || `HTTP ${response.status}: ${response.statusText}`);
-    }
-}
-
 // Funciones de autenticación
 class Auth {
     constructor() {

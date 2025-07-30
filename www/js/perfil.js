@@ -109,29 +109,19 @@ async function handleProfileUpdate(e) {
             body: JSON.stringify(updateData)
         });
 
-        if (response.ok) {
+        const data = await handleApiResponse(response);
+
+        if (data && data.success) {
             notifications.showSuccess('Perfil actualizado correctamente');
             
             // Actualizar datos en localStorage
-            const data = await response.json();
-            const updatedUser = data.usuario || data;
+            const updatedUser = data.usuario || data.data;
             localStorage.setItem('user', JSON.stringify(updatedUser));
             
             // Recargar datos del perfil
             await loadProfile();
         } else {
-            const error = await response.json();
-            const errorMessage = error.msg || error.message || 'Error al actualizar el perfil';
-            
-            if (response.status === 400) {
-                notifications.showError('Datos inválidos. Verifica la información ingresada.');
-            } else if (response.status === 404) {
-                notifications.showError('Usuario no encontrado.');
-            } else if (response.status === 403) {
-                notifications.showError('No tienes permisos para actualizar este perfil.');
-            } else {
-                notifications.showError(errorMessage);
-            }
+            notifications.showError('Error al actualizar el perfil');
         }
     } catch (error) {
         console.error('Error al actualizar perfil:', error);

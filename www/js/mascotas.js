@@ -23,9 +23,10 @@ async function loadPets() {
             }
         });
 
-        if (response.ok) {
-            const data = await response.json();
-            const mascotas = data.mascotas || data;
+        const data = await handleApiResponse(response);
+
+        if (data && data.success) {
+            const mascotas = data.mascotas || data.data || [];
             
             if (mascotas.length === 0) {
                 notifications.showInfo('No hay mascotas registradas');
@@ -33,16 +34,7 @@ async function loadPets() {
             
             displayPets(mascotas);
         } else {
-            const errorData = await response.json();
-            const errorMessage = errorData.msg || errorData.message || 'Error al cargar las mascotas';
-            
-            if (response.status === 404) {
-                notifications.showContextError('mascotas', 'not_found');
-            } else if (response.status === 403) {
-                notifications.showContextError('mascotas', 'no_permission');
-            } else {
-                notifications.showError(errorMessage);
-            }
+            notifications.showError('Error al cargar las mascotas');
         }
     } catch (error) {
         console.error('Error al cargar mascotas:', error);
@@ -161,8 +153,10 @@ async function loadPetData(petId) {
             }
         });
 
-        if (response.ok) {
-            const mascota = await response.json();
+        const data = await handleApiResponse(response);
+
+        if (data && data.success) {
+            const mascota = data.mascota || data.data;
             fillPetForm(mascota);
         } else {
             showError('Error al cargar los datos de la mascota');
@@ -241,13 +235,14 @@ async function handlePetSubmit(e) {
             });
         }
 
-        if (response.ok) {
+        const data = await handleApiResponse(response);
+
+        if (data && data.success) {
             notifications.showSuccess(petId ? 'Mascota actualizada exitosamente' : 'Mascota creada exitosamente');
             closePetModal();
             loadPets(); // Recargar lista
         } else {
-            const errorData = await response.json();
-            const errorMessage = errorData.msg || errorData.message || 'Error al guardar la mascota';
+            const errorMessage = data.msg || data.message || 'Error al guardar la mascota';
             
             if (response.status === 400) {
                 notifications.showError('Datos inválidos. Verifica la información ingresada.');
@@ -287,12 +282,13 @@ async function deletePet(petId) {
             }
         });
 
-        if (response.ok) {
+        const data = await handleApiResponse(response);
+
+        if (data && data.success) {
             notifications.showSuccess('Mascota eliminada exitosamente');
             loadPets(); // Recargar lista
         } else {
-            const errorData = await response.json();
-            const errorMessage = errorData.msg || errorData.message || 'Error al eliminar la mascota';
+            const errorMessage = data.msg || data.message || 'Error al eliminar la mascota';
             
             if (response.status === 403) {
                 notifications.showContextError('mascotas', 'no_permission');

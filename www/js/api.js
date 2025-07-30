@@ -1,8 +1,5 @@
 // api.js - Funciones fetch a la API
 
-// Configuración de la API
-const API_BASE_URL = 'http://localhost:3001/api';
-
 // Clase para manejar las peticiones a la API
 class ApiService {
     constructor() {
@@ -28,16 +25,7 @@ class ApiService {
 
         try {
             const response = await fetch(`${this.baseURL}${endpoint}`, config);
-            
-            if (response.status === 401) {
-                // Token expirado o inválido
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
-                window.location.href = 'login.html';
-                return;
-            }
-
-            return response;
+            return await handleApiResponse(response);
         } catch (error) {
             console.error('Error en petición API:', error);
             // Crear un objeto de error estructurado para mejor manejo
@@ -53,7 +41,7 @@ class ApiService {
     // GET request
     async get(endpoint) {
         const response = await this.request(endpoint, { method: 'GET' });
-        return response.json();
+        return response;
     }
 
     // POST request
@@ -62,7 +50,7 @@ class ApiService {
             method: 'POST',
             body: JSON.stringify(data)
         });
-        return response.json();
+        return response;
     }
 
     // PUT request
@@ -71,13 +59,13 @@ class ApiService {
             method: 'PUT',
             body: JSON.stringify(data)
         });
-        return response.json();
+        return response;
     }
 
     // DELETE request
     async delete(endpoint) {
         const response = await this.request(endpoint, { method: 'DELETE' });
-        return response.json();
+        return response;
     }
 }
 

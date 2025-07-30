@@ -43,9 +43,10 @@ async function loadUsers() {
             }
         });
 
-        if (response.ok) {
-            const data = await response.json();
-            const usuarios = data.usuarios || data;
+        const data = await handleApiResponse(response);
+
+        if (data && data.success) {
+            const usuarios = data.usuarios || data.data || [];
             
             if (usuarios.length === 0) {
                 notifications.showInfo('No hay usuarios registrados');
@@ -53,16 +54,7 @@ async function loadUsers() {
             
             displayUsers(usuarios);
         } else {
-            const errorData = await response.json();
-            const errorMessage = errorData.msg || errorData.message || 'Error al cargar los usuarios';
-            
-            if (response.status === 404) {
-                notifications.showContextError('usuarios', 'not_found');
-            } else if (response.status === 403) {
-                notifications.showContextError('usuarios', 'no_permission');
-            } else {
-                notifications.showError(errorMessage);
-            }
+            notifications.showError('Error al cargar los usuarios');
         }
     } catch (error) {
         console.error('Error al cargar usuarios:', error);
@@ -210,15 +202,13 @@ async function loadUserData(userId) {
             }
         });
 
-        if (response.ok) {
-            const usuario = await response.json();
+        const data = await handleApiResponse(response);
+
+        if (data && data.success) {
+            const usuario = data.usuario || data.data;
             fillUserForm(usuario);
         } else {
-            if (response.status === 404) {
-                notifications.showError('El usuario no fue encontrado.');
-            } else {
-                notifications.showContextError('usuarios', 'load');
-            }
+            notifications.showError('Error al cargar datos del usuario');
         }
     } catch (error) {
         console.error('Error al cargar datos de usuario:', error);
@@ -296,13 +286,14 @@ async function handleUserSubmit(e) {
             });
         }
 
-        if (response.ok) {
+        const data = await handleApiResponse(response);
+
+        if (data && data.success) {
             notifications.showSuccess(userId ? 'Usuario actualizado exitosamente' : 'Usuario creado exitosamente');
             closeUserModal();
             loadUsers(); // Recargar lista
         } else {
-            const errorData = await response.json();
-            const errorMessage = errorData.msg || errorData.message || 'Error al guardar el usuario';
+            const errorMessage = data.msg || data.message || 'Error al guardar el usuario';
             
             if (response.status === 400) {
                 notifications.showError('Datos inválidos. Verifica la información ingresada.');
@@ -344,12 +335,13 @@ async function deleteUser(userId) {
             }
         });
 
-        if (response.ok) {
+        const data = await handleApiResponse(response);
+
+        if (data && data.success) {
             notifications.showSuccess('Usuario eliminado exitosamente');
             loadUsers(); // Recargar lista
         } else {
-            const errorData = await response.json();
-            const errorMessage = errorData.msg || errorData.message || 'Error al eliminar el usuario';
+            const errorMessage = data.msg || data.message || 'Error al eliminar el usuario';
             
             if (response.status === 404) {
                 notifications.showError('El usuario no fue encontrado.');
