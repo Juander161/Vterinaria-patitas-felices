@@ -4,25 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Usuarios - Patitas Felices</title>
-    <link rel="stylesheet" href="../css/estilos.css">
+    <link rel="stylesheet" href="../css/estilos-optimizado.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <header class="header">
+    <header class="header">
+        <div class="container">
             <div class="logo">
                 <img src="../img/logo.png" alt="Patitas Felices">
+                <h2 style="color: white; margin: 0; font-weight: 600;">Patitas Felices</h2>
             </div>
             <nav class="nav">
-                <button onclick="navigateTo('dashboard.html')" class="btn-secondary">Volver al Dashboard</button>
-                <button id="logoutBtn" class="btn-secondary">Cerrar Sesión</button>
+                <!-- El menú hamburguesa se insertará aquí automáticamente -->
             </nav>
-        </header>
+        </div>
+    </header>
 
+    <div class="container">
         <main class="main-content">
-            <div class="users-container">
-                <div class="page-header">
-                    <h1>Gestión de Usuarios</h1>
-                    <button id="addUserBtn" class="btn-primary">+ Nuevo Usuario</button>
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="card-title">Gestión de Usuarios</h1>
+                    <button id="addUserBtn" class="btn btn-primary">
+                        <span>👤</span>
+                        Nuevo Usuario
+                    </button>
                 </div>
 
                 <div id="usersList" class="users-list">
@@ -36,53 +44,53 @@
     <div id="userModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="userModalTitle">Nuevo Usuario</h2>
-                <span class="close" id="closeUserModal">&times;</span>
+                <h2 id="userModalTitle" class="modal-title">Nuevo Usuario</h2>
+                <button class="modal-close" id="closeUserModal">&times;</button>
             </div>
-            <form id="userForm">
-                <div class="form-group">
-                    <label for="userName">Nombre Completo</label>
-                    <input type="text" id="userName" name="nombre" required>
-                </div>
-                <div class="form-group">
-                    <label for="userEmail">Email</label>
-                    <input type="email" id="userEmail" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="userPassword">Contraseña</label>
-                    <input type="password" id="userPassword" name="password" required>
-                </div>
-                <div class="form-group">
-                    <label for="userPhone">Teléfono</label>
-                    <input type="tel" id="userPhone" name="telefono" required>
-                </div>
-                <div class="form-group">
-                    <label for="userAddress">Dirección</label>
-                    <textarea id="userAddress" name="direccion" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="userRole">Rol</label>
-                    <select id="userRole" name="rol" required>
-                        <option value="cliente">Cliente</option>
-                        <option value="veterinario">Veterinario</option>
-                        <option value="recepcionista">Recepcionista</option>
-                        <option value="admin">Administrador</option>
-                    </select>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn-primary">Guardar</button>
-                    <button type="button" id="cancelUserBtn" class="btn-secondary">Cancelar</button>
-                </div>
-            </form>
+            <div class="modal-body">
+                <form id="userForm">
+                    <div class="form-group">
+                        <label for="userName">Nombre Completo</label>
+                        <input type="text" id="userName" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userEmail">Email</label>
+                        <input type="email" id="userEmail" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userPassword">Contraseña</label>
+                        <input type="password" id="userPassword" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userPhone">Teléfono</label>
+                        <input type="tel" id="userPhone" name="telefono" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="userAddress">Dirección</label>
+                        <textarea id="userAddress" name="direccion" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="userRole">Rol</label>
+                        <select id="userRole" name="rol" required>
+                            <option value="cliente">Cliente</option>
+                            <option value="veterinario">Veterinario</option>
+                            <option value="recepcionista">Recepcionista</option>
+                            <option value="admin">Administrador</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" form="userForm" class="btn btn-primary">Guardar</button>
+                <button type="button" id="cancelUserBtn" class="btn btn-secondary">Cancelar</button>
+            </div>
         </div>
     </div>
 
-    <script src="../js/config.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/data-loader.js"></script>
+    <script src="../js/sidebar.js"></script>
     <script src="../js/auth.js"></script>
-    <script src="../js/router.js"></script>
-    <script src="../js/navigation.js"></script>
-    <script src="../js/api.js"></script>
-    <script src="../js/notifications.js"></script>
     <script src="../js/usuarios.js"></script>
 </body>
 </html> 

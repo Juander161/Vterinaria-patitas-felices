@@ -4,25 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Mascotas - Patitas Felices</title>
-    <link rel="stylesheet" href="../css/estilos.css">
+    <link rel="stylesheet" href="../css/estilos-optimizado.css">
 </head>
 <body>
-    <div class="container">
-        <header class="header">
+    <header class="header">
+        <div class="container">
             <div class="logo">
                 <img src="../img/logo.png" alt="Patitas Felices">
+                <h2 style="color: white; margin: 0; font-weight: 600;">Patitas Felices</h2>
             </div>
             <nav class="nav">
-                <button onclick="navigateTo('dashboard.html')" class="btn-secondary">Volver al Dashboard</button>
-                <button id="logoutBtn" class="btn-secondary">Cerrar Sesión</button>
+                <!-- El menú hamburguesa se insertará aquí automáticamente -->
             </nav>
-        </header>
+        </div>
+    </header>
 
+    <div class="container">
         <main class="main-content">
-            <div class="pets-container">
-                <div class="page-header">
-                    <h1>Gestión de Mascotas</h1>
-                    <button id="addPetBtn" class="btn-primary">+ Nueva Mascota</button>
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="card-title">Gestión de Mascotas</h1>
+                    <button id="addPetBtn" class="btn btn-primary">
+                        <span>➕</span>
+                        Nueva Mascota
+                    </button>
                 </div>
 
                 <div id="petsList" class="pets-list">
@@ -36,71 +41,71 @@
     <div id="petModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modalTitle">Nueva Mascota</h2>
-                <span class="close" id="closeModal">&times;</span>
+                <h2 id="modalTitle" class="modal-title">Nueva Mascota</h2>
+                <button class="modal-close" id="closeModal">&times;</button>
             </div>
-            <form id="petForm">
-                <div class="form-group">
-                    <label for="petName">Nombre *</label>
-                    <input type="text" id="petName" name="nombre" required>
-                </div>
-                <div class="form-group">
-                    <label for="petSpecies">Especie *</label>
-                    <select id="petSpecies" name="especie" required>
-                        <option value="">Seleccionar especie</option>
-                        <option value="Perro">Perro</option>
-                        <option value="Gato">Gato</option>
-                        <option value="Ave">Ave</option>
-                        <option value="Reptil">Reptil</option>
-                        <option value="Otro">Otro</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="petBreed">Raza</label>
-                    <input type="text" id="petBreed" name="raza">
-                </div>
-                <div class="form-group">
-                    <label for="petBirthDate">Fecha de Nacimiento</label>
-                    <input type="date" id="petBirthDate" name="fecha_nacimiento">
-                </div>
-                <div class="form-group">
-                    <label for="petSex">Sexo</label>
-                    <select id="petSex" name="sexo">
-                        <option value="">Seleccionar sexo</option>
-                        <option value="Macho">Macho</option>
-                        <option value="Hembra">Hembra</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="petColor">Color</label>
-                    <input type="text" id="petColor" name="color">
-                </div>
-                <div class="form-group">
-                    <label for="petSterilized">Esterilizado</label>
-                    <select id="petSterilized" name="esterilizado">
-                        <option value="">Seleccionar</option>
-                        <option value="true">Sí</option>
-                        <option value="false">No</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="petPhoto">Foto (URL)</label>
-                    <input type="url" id="petPhoto" name="foto" placeholder="https://ejemplo.com/foto.jpg">
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn-primary">Guardar</button>
-                    <button type="button" id="cancelPetBtn" class="btn-secondary">Cancelar</button>
-                </div>
-            </form>
+            <div class="modal-body">
+                <form id="petForm">
+                    <div class="form-group">
+                        <label for="petName">Nombre *</label>
+                        <input type="text" id="petName" name="nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="petSpecies">Especie *</label>
+                        <select id="petSpecies" name="especie" required>
+                            <option value="">Seleccionar especie</option>
+                            <option value="Perro">Perro</option>
+                            <option value="Gato">Gato</option>
+                            <option value="Ave">Ave</option>
+                            <option value="Reptil">Reptil</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="petBreed">Raza</label>
+                        <input type="text" id="petBreed" name="raza">
+                    </div>
+                    <div class="form-group">
+                        <label for="petBirthDate">Fecha de Nacimiento</label>
+                        <input type="date" id="petBirthDate" name="fecha_nacimiento">
+                    </div>
+                    <div class="form-group">
+                        <label for="petSex">Sexo</label>
+                        <select id="petSex" name="sexo">
+                            <option value="">Seleccionar sexo</option>
+                            <option value="Macho">Macho</option>
+                            <option value="Hembra">Hembra</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="petColor">Color</label>
+                        <input type="text" id="petColor" name="color">
+                    </div>
+                    <div class="form-group">
+                        <label for="petSterilized">Esterilizado</label>
+                        <select id="petSterilized" name="esterilizado">
+                            <option value="">Seleccionar</option>
+                            <option value="true">Sí</option>
+                            <option value="false">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="petPhoto">Foto (URL)</label>
+                        <input type="url" id="petPhoto" name="foto" placeholder="https://ejemplo.com/foto.jpg">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" form="petForm" class="btn btn-primary">Guardar</button>
+                <button type="button" id="cancelPetBtn" class="btn btn-secondary">Cancelar</button>
+            </div>
         </div>
     </div>
 
-    <script src="../js/config.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/data-loader.js"></script>
+    <script src="../js/sidebar.js"></script>
     <script src="../js/auth.js"></script>
-    <script src="../js/router.js"></script>
-    <script src="../js/navigation.js"></script>
-    <script src="../js/api.js"></script>
-    <script src="../js/notifications.js"></script>
     <script src="../js/mascotas.js"></script>
 </body>
 </html> 

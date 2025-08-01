@@ -1,15 +1,22 @@
 {
-  "name": "io.cordova.hellocordova",
-  "displayName": "HelloCordova",
+  "name": "patitas-felices-app",
+  "displayName": "Patitas Felices",
   "version": "1.0.0",
-  "description": "A sample Apache Cordova application that responds to the deviceready event.",
+  "description": "Aplicación de gestión para clínica veterinaria Patitas Felices",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "cordova serve",
+    "build": "cordova build",
+    "prepare": "cordova prepare"
   },
   "keywords": [
-    "ecosystem:cordova"
+    "ecosystem:cordova",
+    "veterinaria",
+    "clinica",
+    "mascotas",
+    "gestion"
   ],
-  "author": "Apache Cordova Team",
-  "license": "Apache-2.0"
+  "author": "Equipo Patitas Felices",
+  "license": "MIT"
 }

@@ -4,25 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Citas - Patitas Felices</title>
-    <link rel="stylesheet" href="../css/estilos.css">
+    <link rel="stylesheet" href="../css/estilos-optimizado.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <header class="header">
+    <header class="header">
+        <div class="container">
             <div class="logo">
                 <img src="../img/logo.png" alt="Patitas Felices">
+                <h2 style="color: white; margin: 0; font-weight: 600;">Patitas Felices</h2>
             </div>
             <nav class="nav">
-                <button onclick="navigateTo('dashboard.html')" class="btn-secondary">Volver al Dashboard</button>
-                <button id="logoutBtn" class="btn-secondary">Cerrar Sesión</button>
+                <!-- El menú hamburguesa se insertará aquí automáticamente -->
             </nav>
-        </header>
+        </div>
+    </header>
 
+    <div class="container">
         <main class="main-content">
-            <div class="appointments-container">
-                <div class="page-header">
-                    <h1>Gestión de Citas</h1>
-                    <button id="addAppointmentBtn" class="btn-primary">+ Nueva Cita</button>
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="card-title">Gestión de Citas</h1>
+                    <button id="addAppointmentBtn" class="btn btn-primary">
+                        <span>📅</span>
+                        Nueva Cita
+                    </button>
                 </div>
 
                 <div id="appointmentsList" class="appointments-list">
@@ -36,58 +44,58 @@
     <div id="appointmentModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="appointmentModalTitle">Nueva Cita</h2>
-                <span class="close" id="closeAppointmentModal">&times;</span>
+                <h2 id="appointmentModalTitle" class="modal-title">Nueva Cita</h2>
+                <button class="modal-close" id="closeAppointmentModal">&times;</button>
             </div>
-            <form id="appointmentForm">
-                <div class="form-group">
-                    <label for="appointmentPet">Mascota *</label>
-                    <select id="appointmentPet" name="id_mascota" required>
-                        <option value="">Seleccionar mascota</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="appointmentVet">Veterinario *</label>
-                    <select id="appointmentVet" name="id_veterinario" required>
-                        <option value="">Seleccionar veterinario</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="appointmentDateTime">Fecha y Hora *</label>
-                    <input type="datetime-local" id="appointmentDateTime" name="fecha_hora" required>
-                </div>
-                <div class="form-group">
-                    <label for="appointmentReason">Motivo</label>
-                    <textarea id="appointmentReason" name="motivo" rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="appointmentStatus">Estado *</label>
-                    <select id="appointmentStatus" name="estado" required>
-                        <option value="">Seleccionar estado</option>
-                        <option value="Programada">Programada</option>
-                        <option value="Completada">Completada</option>
-                        <option value="Cancelada">Cancelada</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="appointmentNotes">Notas</label>
-                    <textarea id="appointmentNotes" name="notas" rows="3"></textarea>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn-primary">Guardar</button>
-                    <button type="button" id="cancelAppointmentBtn" class="btn-secondary">Cancelar</button>
-                </div>
-            </form>
+            <div class="modal-body">
+                <form id="appointmentForm">
+                    <div class="form-group">
+                        <label for="appointmentPet">Mascota *</label>
+                        <select id="appointmentPet" name="id_mascota" required>
+                            <option value="">Seleccionar mascota</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentVet">Veterinario *</label>
+                        <select id="appointmentVet" name="id_veterinario" required>
+                            <option value="">Seleccionar veterinario</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentDateTime">Fecha y Hora *</label>
+                        <input type="datetime-local" id="appointmentDateTime" name="fecha_hora" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentReason">Motivo</label>
+                        <textarea id="appointmentReason" name="motivo" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentStatus">Estado *</label>
+                        <select id="appointmentStatus" name="estado" required>
+                            <option value="">Seleccionar estado</option>
+                            <option value="Programada">Programada</option>
+                            <option value="Completada">Completada</option>
+                            <option value="Cancelada">Cancelada</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentNotes">Notas</label>
+                        <textarea id="appointmentNotes" name="notas" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" form="appointmentForm" class="btn btn-primary">Guardar</button>
+                <button type="button" id="cancelAppointmentBtn" class="btn btn-secondary">Cancelar</button>
+            </div>
         </div>
     </div>
 
     <!-- Scripts -->
-    <script src="../js/config.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/data-loader.js"></script>
+    <script src="../js/sidebar.js"></script>
     <script src="../js/auth.js"></script>
-    <script src="../js/router.js"></script>
-    <script src="../js/navigation.js"></script>
-    <script src="../js/api.js"></script>
-    <script src="../js/notifications.js"></script>
     <script src="../js/citas.js"></script>
 </body>
 </html> 

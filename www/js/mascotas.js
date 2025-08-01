@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Verificar autenticación
     if (!auth.isAuthenticated()) {
-        navigateTo('login.html');
+        window.location.href = 'login.html';
         return;
     }
 
@@ -16,35 +16,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Función para cargar lista de mascotas
 async function loadPets() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/mascotas`, {
-            headers: {
-                'Authorization': `Bearer ${auth.getToken()}`
-            }
-        });
-
-        const data = await handleApiResponse(response);
-
-        if (data && data.success) {
-            const mascotas = data.mascotas || data.data || [];
-            
-            if (mascotas.length === 0) {
-                notifications.showInfo('No hay mascotas registradas');
-            }
-            
-            displayPets(mascotas);
-        } else {
-            notifications.showError('Error al cargar las mascotas');
-        }
-    } catch (error) {
-        console.error('Error al cargar mascotas:', error);
-        
-        if (error.type === 'network') {
-            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
-        } else {
-            notifications.showContextError('mascotas', 'load');
-        }
-    }
+    const mascotas = await dataLoader.loadMascotas();
+    displayPets(mascotas);
 }
 
 // Función para mostrar mascotas en la interfaz
@@ -53,25 +26,39 @@ function displayPets(mascotas) {
     if (!petsList) return;
 
     if (mascotas.length === 0) {
-        petsList.innerHTML = '<p class="no-data">No hay mascotas registradas</p>';
+        petsList.innerHTML = '<div class="no-data">No hay mascotas registradas</div>';
         return;
     }
 
     const petsHTML = mascotas.map(mascota => `
-        <div class="pet-card" data-id="${mascota._id || mascota.id}">
-            <div class="pet-info">
-                <h3>${mascota.nombre}</h3>
-                <p><strong>Especie:</strong> ${mascota.especie}</p>
-                <p><strong>Raza:</strong> ${mascota.raza || 'N/A'}</p>
-                <p><strong>Sexo:</strong> ${mascota.sexo || 'N/A'}</p>
-                <p><strong>Color:</strong> ${mascota.color || 'N/A'}</p>
-                <p><strong>Esterilizado:</strong> ${mascota.esterilizado ? 'Sí' : 'No'}</p>
-                ${mascota.fecha_nacimiento ? `<p><strong>Fecha de nacimiento:</strong> ${formatDate(mascota.fecha_nacimiento)}</p>` : ''}
-                ${mascota.foto ? `<img src="${mascota.foto}" alt="${mascota.nombre}" class="pet-photo">` : ''}
+        <div class="card" data-id="${mascota._id || mascota.id}">
+            <div class="card-header">
+                <h3 class="card-title">${mascota.nombre}</h3>
+                <div class="card-actions">
+                    <button class="btn btn-secondary" onclick="editPet('${mascota._id || mascota.id}')">
+                        <span>✏️</span>
+                        Editar
+                    </button>
+                    <button class="btn btn-danger" onclick="deletePet('${mascota._id || mascota.id}')">
+                        <span>🗑️</span>
+                        Eliminar
+                    </button>
+                </div>
             </div>
-            <div class="pet-actions">
-                <button class="btn-edit" onclick="editPet('${mascota._id || mascota.id}')">Editar</button>
-                <button class="btn-delete" onclick="deletePet('${mascota._id || mascota.id}')">Eliminar</button>
+            <div class="pet-info">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div>
+                        <p><strong>Especie:</strong> ${mascota.especie}</p>
+                        <p><strong>Raza:</strong> ${mascota.raza || 'N/A'}</p>
+                        <p><strong>Sexo:</strong> ${mascota.sexo || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <p><strong>Color:</strong> ${mascota.color || 'N/A'}</p>
+                        <p><strong>Esterilizado:</strong> ${mascota.esterilizado ? 'Sí' : 'No'}</p>
+                        ${mascota.fecha_nacimiento ? `<p><strong>Fecha de nacimiento:</strong> ${formatDate(mascota.fecha_nacimiento)}</p>` : ''}
+                    </div>
+                </div>
+                ${mascota.foto ? `<div style="margin-top: 1rem;"><img src="${mascota.foto}" alt="${mascota.nombre}" style="max-width: 200px; border-radius: 8px; box-shadow: var(--shadow-sm);"></div>` : ''}
             </div>
         </div>
     `).join('');
@@ -147,13 +134,13 @@ function closePetModal() {
 // Función para cargar datos de mascota
 async function loadPetData(petId) {
     try {
-        const response = await fetch(`${API_BASE_URL}/mascotas/${petId}`, {
+        const response = await fetch(`${window.API_BASE_URL}/mascotas/${petId}`, {
             headers: {
                 'Authorization': `Bearer ${auth.getToken()}`
             }
         });
 
-        const data = await handleApiResponse(response);
+        const data = await window.handleApiResponse(response);
 
         if (data && data.success) {
             const mascota = data.mascota || data.data;
@@ -215,7 +202,7 @@ async function handlePetSubmit(e) {
         let response;
         if (petId) {
             // Actualizar mascota existente
-            response = await fetch(`${API_BASE_URL}/mascotas/${petId}`, {
+            response = await fetch(`${window.API_BASE_URL}/mascotas/${petId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -225,7 +212,7 @@ async function handlePetSubmit(e) {
             });
         } else {
             // Crear nueva mascota
-            response = await fetch(`${API_BASE_URL}/mascotas`, {
+            response = await fetch(`${window.API_BASE_URL}/mascotas`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -235,30 +222,30 @@ async function handlePetSubmit(e) {
             });
         }
 
-        const data = await handleApiResponse(response);
+        const data = await window.handleApiResponse(response);
 
         if (data && data.success) {
-            notifications.showSuccess(petId ? 'Mascota actualizada exitosamente' : 'Mascota creada exitosamente');
+            showSuccess(petId ? 'Mascota actualizada exitosamente' : 'Mascota creada exitosamente');
             closePetModal();
             loadPets(); // Recargar lista
         } else {
             const errorMessage = data.msg || data.message || 'Error al guardar la mascota';
             
             if (response.status === 400) {
-                notifications.showError('Datos inválidos. Verifica la información ingresada.');
+                showError('Datos inválidos. Verifica la información ingresada.');
             } else if (response.status === 409) {
-                notifications.showError('Ya existe una mascota con estos datos.');
+                showError('Ya existe una mascota con estos datos.');
             } else {
-                notifications.showError(errorMessage);
+                showError(errorMessage);
             }
         }
     } catch (error) {
         console.error('Error al guardar mascota:', error);
         
         if (error.type === 'network') {
-            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
+            showError('Error de conexión. Verifica tu conexión a internet.');
         } else {
-            notifications.showContextError('mascotas', petId ? 'update' : 'create');
+            showError('Error al ' + (petId ? 'actualizar' : 'crear') + ' la mascota');
         }
     }
 }
@@ -275,36 +262,36 @@ async function deletePet(petId) {
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/mascotas/${petId}`, {
+        const response = await fetch(`${window.API_BASE_URL}/mascotas/${petId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${auth.getToken()}`
             }
         });
 
-        const data = await handleApiResponse(response);
+        const data = await window.handleApiResponse(response);
 
         if (data && data.success) {
-            notifications.showSuccess('Mascota eliminada exitosamente');
+            showSuccess('Mascota eliminada exitosamente');
             loadPets(); // Recargar lista
         } else {
             const errorMessage = data.msg || data.message || 'Error al eliminar la mascota';
             
             if (response.status === 403) {
-                notifications.showContextError('mascotas', 'no_permission');
+                showError('No tienes permisos para eliminar esta mascota.');
             } else if (response.status === 404) {
-                notifications.showError('La mascota no fue encontrada.');
+                showError('La mascota no fue encontrada.');
             } else {
-                notifications.showError(errorMessage);
+                showError(errorMessage);
             }
         }
     } catch (error) {
         console.error('Error al eliminar mascota:', error);
         
         if (error.type === 'network') {
-            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
+            showError('Error de conexión. Verifica tu conexión a internet.');
         } else {
-            notifications.showContextError('mascotas', 'delete');
+            showError('Error al eliminar la mascota');
         }
     }
 }
@@ -350,9 +337,17 @@ function formatDate(dateString) {
 
 // Funciones de utilidad para mostrar mensajes (mantenidas para compatibilidad)
 function showSuccess(message) {
-    notifications.showSuccess(message);
+    if (typeof window.showSuccess === 'function') {
+        window.showSuccess(message);
+    } else {
+        console.log('SUCCESS:', message);
+    }
 }
 
 function showError(message) {
-    notifications.showError(message);
+    if (typeof window.showError === 'function') {
+        window.showError(message);
+    } else {
+        console.error('ERROR:', message);
+    }
 } 

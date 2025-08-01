@@ -10,7 +10,7 @@ class Auth {
     // Login
     async login(email, password) {
         try {
-            const response = await fetch(`${API_BASE_URL}/auth/login`, {
+            const response = await fetch(`${window.API_BASE_URL}/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -18,7 +18,7 @@ class Auth {
                 body: JSON.stringify({ email, password })
             });
 
-            const data = await handleApiResponse(response);
+            const data = await window.handleApiResponse(response);
 
             if (data && data.success) {
                 this.token = data.token;
@@ -38,7 +38,7 @@ class Auth {
     // Registro
     async register(userData) {
         try {
-            const response = await fetch(`${API_BASE_URL}/auth/registro`, {
+            const response = await fetch(`${window.API_BASE_URL}/auth/registro`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -46,7 +46,7 @@ class Auth {
                 body: JSON.stringify(userData)
             });
 
-            const data = await handleApiResponse(response);
+            const data = await window.handleApiResponse(response);
 
             if (data && data.success) {
                 // Auto-login después del registro
@@ -63,13 +63,13 @@ class Auth {
     // Obtener perfil del usuario
     async getProfile() {
         try {
-            const response = await fetch(`${API_BASE_URL}/auth/perfil`, {
+            const response = await fetch(`${window.API_BASE_URL}/auth/perfil`, {
                 headers: {
                     'Authorization': `Bearer ${this.token}`
                 }
             });
 
-            const data = await handleApiResponse(response);
+            const data = await window.handleApiResponse(response);
 
             if (data && data.success) {
                 this.user = data.usuario || data.user; // La API devuelve 'usuario' o 'user'
@@ -146,10 +146,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const result = await auth.login(email, password);
             
             if (result.success) {
+                showSuccess('Login exitoso');
                 // Redirigir según el rol
-                window.location.href = 'dashboard.html';
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
             } else {
-                alert(result.message || 'Error en el login');
+                showError(result.message || 'Error en el login');
             }
         });
     }
@@ -173,9 +176,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const result = await auth.register(userData);
             
             if (result.success) {
-                window.location.href = 'dashboard.html';
+                showSuccess('Registro exitoso');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
             } else {
-                alert(result.message || 'Error en el registro');
+                showError(result.message || 'Error en el registro');
             }
         });
     }
