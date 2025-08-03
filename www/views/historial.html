@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <header class="header">
         <div class="container">
@@ -44,151 +46,98 @@
     <div id="historyModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="historyModalTitle">Nuevo Historial</h2>
-                <span class="close" id="closeHistoryModal">&times;</span>
+                <h2 id="historyModalTitle" class="modal-title">Nuevo Historial</h2>
+                <button class="modal-close" id="closeHistoryModal">&times;</button>
             </div>
-            <form id="historyForm">
-                <div class="form-group">
-                    <label for="historyPet">Mascota *</label>
-                    <select id="historyPet" name="id_mascota" required>
-                        <option value="">Seleccionar mascota</option>
-                    </select>
-                </div>
-                
-                <!-- Sección de Vacunas -->
-                <div class="form-section">
-                    <h3>Vacunas</h3>
-                    <div id="vacunasContainer">
-                        <div class="vacuna-item">
-                            <div class="form-group">
-                                <label>Nombre de la Vacuna</label>
-                                <input type="text" name="vacunas[0][nombre]" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Fecha de Aplicación</label>
-                                <input type="date" name="vacunas[0][fecha]" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Próxima Fecha</label>
-                                <input type="date" name="vacunas[0][proxima_fecha]" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Lote</label>
-                                <input type="text" name="vacunas[0][lote]">
-                            </div>
-                            <div class="form-group">
-                                <label>Veterinario</label>
-                                <input type="text" name="vacunas[0][veterinario]">
+            <div class="modal-body">
+                <form id="historyForm">
+                    <div class="form-group">
+                        <label for="historyPet">Mascota *</label>
+                        <select id="historyPet" name="id_mascota" required>
+                            <option value="">Seleccionar mascota</option>
+                        </select>
+                    </div>
+
+                    <!-- Sección de Vacunas -->
+                    <div class="form-section">
+                        <h3
+                            style="color: var(--primary-color); margin-bottom: 1rem; border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem;">
+                            Vacunas</h3>
+                        <div id="vacunasContainer">
+                            <div class="vacuna-item"
+                                style="background: var(--light-gray); padding: 1rem; border-radius: var(--border-radius); margin-bottom: 1rem;">
+                                <div
+                                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                    <div class="form-group">
+                                        <label>Nombre de la Vacuna</label>
+                                        <input type="text" name="vacunas[0][nombre]">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Fecha de Aplicación</label>
+                                        <input type="date" name="vacunas[0][fecha]">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Próxima Fecha</label>
+                                        <input type="date" name="vacunas[0][proxima_fecha]">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Lote</label>
+                                        <input type="text" name="vacunas[0][lote]">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Veterinario</label>
+                                        <input type="text" name="vacunas[0][veterinario]">
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                        <button type="button" id="addVacunaBtn" class="btn btn-secondary">+ Agregar Vacuna</button>
                     </div>
-                    <button type="button" id="addVacunaBtn" class="btn-secondary">+ Agregar Vacuna</button>
-                </div>
 
-                <!-- Sección de Alergias -->
-                <div class="form-section">
-                    <h3>Alergias</h3>
-                    <div id="alergiasContainer">
-                        <div class="alergia-item">
-                            <div class="form-group">
-                                <label>Sustancia</label>
-                                <input type="text" name="alergias[0][sustancia]">
-                            </div>
-                            <div class="form-group">
-                                <label>Gravedad</label>
-                                <select name="alergias[0][gravedad]">
-                                    <option value="">Seleccionar</option>
-                                    <option value="Leve">Leve</option>
-                                    <option value="Moderada">Moderada</option>
-                                    <option value="Severa">Severa</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Reacción</label>
-                                <input type="text" name="alergias[0][reaccion]">
+                    <!-- Sección de Alergias -->
+                    <div class="form-section">
+                        <h3
+                            style="color: var(--warning-color); margin-bottom: 1rem; border-bottom: 2px solid var(--warning-color); padding-bottom: 0.5rem;">
+                            Alergias</h3>
+                        <div id="alergiasContainer">
+                            <div class="alergia-item"
+                                style="background: var(--light-gray); padding: 1rem; border-radius: var(--border-radius); margin-bottom: 1rem;">
+                                <div
+                                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                    <div class="form-group">
+                                        <label>Sustancia</label>
+                                        <input type="text" name="alergias[0][sustancia]">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Gravedad</label>
+                                        <select name="alergias[0][gravedad]">
+                                            <option value="">Seleccionar</option>
+                                            <option value="Leve">Leve</option>
+                                            <option value="Moderada">Moderada</option>
+                                            <option value="Severa">Severa</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Reacción</label>
+                                        <input type="text" name="alergias[0][reaccion]">
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                        <button type="button" id="addAlergiaBtn" class="btn btn-secondary">+ Agregar Alergia</button>
                     </div>
-                    <button type="button" id="addAlergiaBtn" class="btn-secondary">+ Agregar Alergia</button>
-                </div>
 
-                <!-- Sección de Cirugías -->
-                <div class="form-section">
-                    <h3>Cirugías</h3>
-                    <div id="cirugiasContainer">
-                        <div class="cirugia-item">
-                            <div class="form-group">
-                                <label>Nombre de la Cirugía</label>
-                                <input type="text" name="cirugias[0][nombre]">
-                            </div>
-                            <div class="form-group">
-                                <label>Fecha</label>
-                                <input type="date" name="cirugias[0][fecha]">
-                            </div>
-                            <div class="form-group">
-                                <label>Veterinario</label>
-                                <input type="text" name="cirugias[0][veterinario]">
-                            </div>
-                            <div class="form-group">
-                                <label>Descripción</label>
-                                <textarea name="cirugias[0][descripcion]" rows="3" style="resize: vertical; min-height: 80px;"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label>Complicaciones</label>
-                                <textarea name="cirugias[0][complicaciones]" rows="3" style="resize: vertical; min-height: 80px;"></textarea>
-                            </div>
-                        </div>
+                    <!-- Notas Generales -->
+                    <div class="form-group">
+                        <label for="historyNotes">Notas Generales</label>
+                        <textarea id="historyNotes" name="notas_generales" rows="4"></textarea>
                     </div>
-                    <button type="button" id="addCirugiaBtn" class="btn-secondary">+ Agregar Cirugía</button>
-                </div>
-
-                <!-- Enfermedades Crónicas -->
-                <div class="form-section">
-                    <h3>Enfermedades Crónicas</h3>
-                    <div id="enfermedadesContainer">
-                        <div class="enfermedad-item">
-                            <div class="form-group">
-                                <label>Enfermedad</label>
-                                <input type="text" name="enfermedades_cronicas[]">
-                            </div>
-                        </div>
-                    </div>
-                    <button type="button" id="addEnfermedadBtn" class="btn-secondary">+ Agregar Enfermedad</button>
-                </div>
-
-                <!-- Medicamentos Actuales -->
-                <div class="form-section">
-                    <h3>Medicamentos Actuales</h3>
-                    <div id="medicamentosContainer">
-                        <div class="medicamento-item">
-                            <div class="form-group">
-                                <label>Nombre del Medicamento</label>
-                                <input type="text" name="medicamentos_actuales[0][nombre]">
-                            </div>
-                            <div class="form-group">
-                                <label>Dosis</label>
-                                <input type="text" name="medicamentos_actuales[0][dosis]">
-                            </div>
-                            <div class="form-group">
-                                <label>Frecuencia</label>
-                                <input type="text" name="medicamentos_actuales[0][frecuencia]">
-                            </div>
-                        </div>
-                    </div>
-                    <button type="button" id="addMedicamentoBtn" class="btn-secondary">+ Agregar Medicamento</button>
-                </div>
-
-                <!-- Notas Generales -->
-                <div class="form-group">
-                    <label for="historyNotes">Notas Generales</label>
-                    <textarea id="historyNotes" name="notas_generales" rows="4" style="resize: vertical; min-height: 100px;"></textarea>
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn-primary">Guardar</button>
-                    <button type="button" id="cancelHistoryBtn" class="btn-secondary">Cancelar</button>
-                </div>
-            </form>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" form="historyForm" class="btn btn-primary">Guardar</button>
+                <button type="button" id="cancelHistoryBtn" class="btn btn-secondary">Cancelar</button>
+            </div>
         </div>
     </div>
 
@@ -198,4 +147,5 @@
     <script src="../js/auth.js"></script>
     <script src="../js/historial.js"></script>
 </body>
-</html> 
+
+</html>

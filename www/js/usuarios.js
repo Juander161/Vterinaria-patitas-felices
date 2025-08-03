@@ -37,13 +37,13 @@ function checkUserPermissions() {
 // Función para cargar lista de usuarios
 async function loadUsers() {
     try {
-        const response = await fetch(`${API_BASE_URL}/usuarios`, {
+        const response = await fetch(`${window.API_BASE_URL}/usuarios`, {
             headers: {
                 'Authorization': `Bearer ${auth.getToken()}`
             }
         });
 
-        const data = await handleApiResponse(response);
+        const data = await window.handleApiResponse(response);
 
         if (data && data.success) {
             const usuarios = data.usuarios || data.data || [];
@@ -196,13 +196,13 @@ function closeUserModal() {
 // Función para cargar datos de usuario
 async function loadUserData(userId) {
     try {
-        const response = await fetch(`${API_BASE_URL}/usuarios/${userId}`, {
+        const response = await fetch(`${window.API_BASE_URL}/usuarios/${userId}`, {
             headers: {
                 'Authorization': `Bearer ${auth.getToken()}`
             }
         });
 
-        const data = await handleApiResponse(response);
+        const data = await window.handleApiResponse(response);
 
         if (data && data.success) {
             const usuario = data.usuario || data.data;
@@ -266,7 +266,7 @@ async function handleUserSubmit(e) {
         let response;
         if (userId) {
             // Actualizar usuario existente
-            response = await fetch(`${API_BASE_URL}/usuarios/${userId}`, {
+            response = await fetch(`${window.API_BASE_URL}/usuarios/${userId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -276,7 +276,7 @@ async function handleUserSubmit(e) {
             });
         } else {
             // Crear nuevo usuario
-            response = await fetch(`${API_BASE_URL}/auth/registro`, {
+            response = await fetch(`${window.API_BASE_URL}/auth/registro`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -286,7 +286,7 @@ async function handleUserSubmit(e) {
             });
         }
 
-        const data = await handleApiResponse(response);
+        const data = await window.handleApiResponse(response);
 
         if (data && data.success) {
             notifications.showSuccess(userId ? 'Usuario actualizado exitosamente' : 'Usuario creado exitosamente');
@@ -328,14 +328,14 @@ async function deleteUser(userId) {
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/usuarios/${userId}`, {
+        const response = await fetch(`${window.API_BASE_URL}/usuarios/${userId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${auth.getToken()}`
             }
         });
 
-        const data = await handleApiResponse(response);
+        const data = await window.handleApiResponse(response);
 
         if (data && data.success) {
             notifications.showSuccess('Usuario eliminado exitosamente');

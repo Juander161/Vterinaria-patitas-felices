@@ -21,33 +21,35 @@ document.addEventListener('DOMContentLoaded', function() {
 // Función para cargar lista de citas
 async function loadAppointments() {
     try {
-        const response = await fetch(`${API_BASE_URL}/citas`, {
+        showInfo('Cargando citas...');
+        
+        const response = await fetch(`${window.API_BASE_URL}/citas`, {
             headers: {
-                'Authorization': `Bearer ${auth.getToken()}`
+                'Authorization': `Bearer ${auth.getToken()}`,
+                'Content-Type': 'application/json'
             }
         });
 
-        const data = await handleApiResponse(response);
+        const data = await window.handleApiResponse(response);
 
         if (data && data.success) {
             const citas = data.citas || data.data || [];
             
             if (citas.length === 0) {
-                notifications.showInfo('No hay citas programadas');
+                showInfo('No hay citas programadas');
+            } else {
+                showSuccess(`${citas.length} citas cargadas`);
             }
             
             displayAppointments(citas);
         } else {
-            notifications.showError('Error al cargar las citas');
+            showError('Error al cargar las citas');
+            displayAppointments([]);
         }
     } catch (error) {
         console.error('Error al cargar citas:', error);
-        
-        if (error.type === 'network') {
-            notifications.showError('Error de conexión. Verifica tu conexión a internet.');
-        } else {
-            notifications.showContextError('citas', 'load');
-        }
+        showError('Error de conexión. Verifica que la API esté funcionando.');
+        displayAppointments([]);
     }
 }
 
@@ -89,13 +91,13 @@ function displayAppointments(citas) {
 // Función para cargar mascotas para el formulario
 async function loadPetsForForm() {
     try {
-        const response = await fetch(`${API_BASE_URL}/mascotas`, {
+        const response = await fetch(`${window.API_BASE_URL}/mascotas`, {
             headers: {
                 'Authorization': `Bearer ${auth.getToken()}`
             }
         });
 
-        const data = await handleApiResponse(response);
+        const data = await window.handleApiResponse(response);
 
         if (data && data.success) {
             const mascotas = data.mascotas || data.data || [];
@@ -112,13 +114,13 @@ async function loadPetsForForm() {
 async function loadVeterinariosForForm() {
     try {
         console.log('Cargando veterinarios...');
-        const response = await fetch(`${API_BASE_URL}/usuarios`, {
+        const response = await fetch(`${window.API_BASE_URL}/usuarios`, {
             headers: {
                 'Authorization': `Bearer ${auth.getToken()}`
             }
         });
 
-        const data = await handleApiResponse(response);
+        const data = await window.handleApiResponse(response);
 
         if (data && data.success) {
             const usuarios = data.usuarios || data.data || [];
@@ -193,6 +195,7 @@ function setupEventListeners() {
 
     if (addAppointmentBtn) {
         addAppointmentBtn.addEventListener('click', function() {
+            console.log('Botón Nueva Cita clickeado');
             openAppointmentModal();
         });
     }
@@ -259,13 +262,13 @@ function closeAppointmentModal() {
 // Función para cargar datos de cita
 async function loadAppointmentData(appointmentId) {
     try {
-        const response = await fetch(`${API_BASE_URL}/citas/${appointmentId}`, {
+        const response = await fetch(`${window.API_BASE_URL}/citas/${appointmentId}`, {
             headers: {
                 'Authorization': `Bearer ${auth.getToken()}`
             }
         });
 
-        const data = await handleApiResponse(response);
+        const data = await window.handleApiResponse(response);
 
         if (data && data.success) {
             const cita = data.cita || data.data;
@@ -346,7 +349,7 @@ async function handleAppointmentSubmit(e) {
         if (appointmentId) {
             // Actualizar cita existente
             console.log('Actualizando cita:', appointmentId);
-            response = await fetch(`${API_BASE_URL}/citas/${appointmentId}`, {
+            response = await fetch(`${window.API_BASE_URL}/citas/${appointmentId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -357,7 +360,7 @@ async function handleAppointmentSubmit(e) {
         } else {
             // Crear nueva cita
             console.log('Creando nueva cita');
-            response = await fetch(`${API_BASE_URL}/citas`, {
+            response = await fetch(`${window.API_BASE_URL}/citas`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -368,7 +371,7 @@ async function handleAppointmentSubmit(e) {
         }
 
         console.log('Respuesta del servidor:', response.status);
-        const data = await handleApiResponse(response);
+        const data = await window.handleApiResponse(response);
 
         if (data && data.success) {
             notifications.showSuccess(appointmentId ? 'Cita actualizada exitosamente' : 'Cita creada exitosamente');
@@ -410,3 +413,61 @@ async function cancelAppointment(appointmentId) {
 
     try {
         const response = await fetch(`
+// F
+unciones de utilidad para mostrar mensajes
+function showSuccess(message) {
+    if (typeof window.showSuccess === 'function') {
+        window.showSuccess(message);
+    } else {
+        console.log('SUCCESS:', message);
+    }
+}
+
+function showError(message) {
+    if (typeof window.showError === 'function') {
+        window.showError(message);
+    } else {
+        console.error('ERROR:', message);
+    }
+}
+
+function showInfo(message) {
+    if (typeof window.showInfo === 'function') {
+        window.showInfo(message);
+    } else {
+        console.log('INFO:', message);
+    }
+}
+
+// Función para formatear fecha y hora
+function formatDateTime(dateString) {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+// Función para obtener el estado de una cita en español
+function getAppointmentStatus(status) {
+    const statusMap = {
+        'Programada': 'Programada',
+        'Completada': 'Completada',
+        'Cancelada': 'Cancelada'
+    };
+    return statusMap[status] || status;
+}
+
+// Función para obtener el color del estado de una cita
+function getAppointmentStatusColor(status) {
+    const colorMap = {
+        'Programada': '#ffc107',
+        'Completada': '#28a745',
+        'Cancelada': '#dc3545'
+    };
+    return colorMap[status] || '#6c757d';
+}

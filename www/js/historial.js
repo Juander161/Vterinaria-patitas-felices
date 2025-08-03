@@ -38,13 +38,13 @@ function checkHistoryPermissions() {
 // Función para cargar lista de historiales
 async function loadHistories() {
     try {
-        const response = await fetch(`${API_BASE_URL}/historiales`, {
+        const response = await fetch(`${window.API_BASE_URL}/historiales`, {
             headers: {
                 'Authorization': `Bearer ${auth.getToken()}`
             }
         });
 
-        const data = await handleApiResponse(response);
+        const data = await window.handleApiResponse(response);
 
         if (data && data.success) {
             const historiales = data.historiales || data.data || [];
@@ -115,13 +115,13 @@ function canDeleteHistory() {
 // Función para cargar mascotas para el formulario
 async function loadPetsForHistoryForm() {
     try {
-        const response = await fetch(`${API_BASE_URL}/mascotas`, {
+        const response = await fetch(`${window.API_BASE_URL}/mascotas`, {
             headers: {
                 'Authorization': `Bearer ${auth.getToken()}`
             }
         });
 
-        const data = await handleApiResponse(response);
+        const data = await window.handleApiResponse(response);
 
         if (data && data.success) {
             const mascotas = data.mascotas || data.data || [];
@@ -434,13 +434,13 @@ function clearDynamicFields() {
 // Función para cargar datos de historial
 async function loadHistoryData(historyId) {
     try {
-        const response = await fetch(`${API_BASE_URL}/historiales/${historyId}`, {
+        const response = await fetch(`${window.API_BASE_URL}/historiales/${historyId}`, {
             headers: {
                 'Authorization': `Bearer ${auth.getToken()}`
             }
         });
 
-        const data = await handleApiResponse(response);
+        const data = await window.handleApiResponse(response);
 
         if (data && data.success) {
             const historial = data.historial || data.data;
@@ -623,7 +623,7 @@ async function handleHistorySubmit(e) {
         let response;
         if (historyId) {
             // Actualizar historial existente
-            response = await fetch(`${API_BASE_URL}/historiales/${historyId}`, {
+            response = await fetch(`${window.API_BASE_URL}/historiales/${historyId}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -633,7 +633,7 @@ async function handleHistorySubmit(e) {
             });
         } else {
             // Crear nuevo historial
-            response = await fetch(`${API_BASE_URL}/historiales`, {
+            response = await fetch(`${window.API_BASE_URL}/historiales`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -643,7 +643,7 @@ async function handleHistorySubmit(e) {
             });
         }
 
-        const data = await handleApiResponse(response);
+        const data = await window.handleApiResponse(response);
 
         if (data && data.success) {
             notifications.showSuccess(historyId ? 'Historial actualizado exitosamente' : 'Historial creado exitosamente');
@@ -777,14 +777,14 @@ async function deleteHistory(historyId) {
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/historiales/${historyId}`, {
+        const response = await fetch(`${window.API_BASE_URL}/historiales/${historyId}`, {
             method: 'DELETE',
             headers: {
                 'Authorization': `Bearer ${auth.getToken()}`
             }
         });
 
-        const data = await handleApiResponse(response);
+        const data = await window.handleApiResponse(response);
 
         if (data && data.success) {
             notifications.showSuccess('Historial eliminado exitosamente');

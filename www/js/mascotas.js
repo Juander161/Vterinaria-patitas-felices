@@ -16,8 +16,37 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Función para cargar lista de mascotas
 async function loadPets() {
-    const mascotas = await dataLoader.loadMascotas();
-    displayPets(mascotas);
+    try {
+        showInfo('Cargando mascotas...');
+        
+        const response = await fetch(`${window.API_BASE_URL}/mascotas`, {
+            headers: {
+                'Authorization': `Bearer ${auth.getToken()}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await window.handleApiResponse(response);
+
+        if (data && data.success) {
+            const mascotas = data.mascotas || data.data || [];
+            
+            if (mascotas.length === 0) {
+                showInfo('No hay mascotas registradas');
+            } else {
+                showSuccess(`${mascotas.length} mascotas cargadas`);
+            }
+            
+            displayPets(mascotas);
+        } else {
+            showError('Error al cargar las mascotas');
+            displayPets([]);
+        }
+    } catch (error) {
+        console.error('Error al cargar mascotas:', error);
+        showError('Error de conexión. Verifica que la API esté funcionando.');
+        displayPets([]);
+    }
 }
 
 // Función para mostrar mascotas en la interfaz
@@ -349,5 +378,13 @@ function showError(message) {
         window.showError(message);
     } else {
         console.error('ERROR:', message);
+    }
+}
+
+function showInfo(message) {
+    if (typeof window.showInfo === 'function') {
+        window.showInfo(message);
+    } else {
+        console.log('INFO:', message);
     }
 } 
